@@ -4,3 +4,6 @@ Using Color sampes from the local paint shop, I've created a Python script to cr
 
 
 ![image2](https://github.com/steveseguin/color-grading/raw/master/output.png)
+
+
+https://www.desmos.com/calculator/ayzuiggdg5

@@ -46,7 +46,7 @@ for x in range(3):
 			plt.xlim([0,256])
 			
 
-img2 = cv2.imread("image2.png", 1)	
+img2 = cv2.imread("Image2.png", 1)	
 img2 = cv2.cvtColor(img2, cv2.COLOR_BGR2RGB)
 img2 = img2.astype(np.float32, copy=False)
 tb=np.zeros(3)
@@ -98,8 +98,9 @@ for rgb in range(3):
 #    mh=0;
 #mh = mh-mb/2
 #img2+=mh
-where = np.where(img2>225)
+where = np.where((img2>225) &(img2<492))
 out = LUT2[np.uint16(np.round(img2[where]-225))]
+print(np.shape(LUT2))
 img2[where] = out
 #print(np.shape(where))
 #print(LUT1) ## INPUT+120 = LUTINDEX; max INPUT 25; min -94 ?
@@ -114,6 +115,11 @@ img2 = img2.astype(np.uint8, copy=False)
 
 #cv2.imshow("image",cv2.cvtColor(cv2.resize(img2,(1920,1080)), cv2.COLOR_RGB2BGR))
 #cv2.waitKey(1)
+
+
+cv2.imshow("image",cv2.cvtColor(cv2.resize(img2,(1920,1080)), cv2.COLOR_RGB2BGR))
+cv2.waitKey(0)
+#cv2.imwrite("post-lut.png",cv2.cvtColor(img2, cv2.COLOR_RGB2BGR))
 
 cap = cv2.VideoCapture('P1002881.MOV')
 while(cap.isOpened()):
@@ -144,4 +150,3 @@ while(cap.isOpened()):
 
         cv2.imshow("image",cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
         cv2.waitKey(1)
- 

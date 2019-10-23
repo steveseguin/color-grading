@@ -1,4 +1,4 @@
-# color-grading
+# LUT Creator (png type) for OBS and other
 
 https://github.com/steveseguin/color-grading/blob/master/colab.ipynb
 

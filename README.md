@@ -11,6 +11,8 @@ http://colab.research.google.com/github/steveseguin/color-grading/blob/master/co
 
 This tool can be run on Google Colab, so no Python setup or local operation is neede -- all in the cloud if desired. Check it out at the link above!
 
+A video walk-thru of this tool can be found here: https://www.youtube.com/watch?v=pu9IpbfckDo
+
 If you happen to make a derivation or distribution of this code, commericial or otherwise, please give credit and a link back to this github repo: https://github.com/steveseguin/color-grading
 
 

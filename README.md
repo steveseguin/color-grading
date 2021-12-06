@@ -9,7 +9,7 @@ Using accurate Color samples obtained from the local paint shop, I've created a 
 
 http://colab.research.google.com/github/steveseguin/color-grading/blob/master/colab.ipynb
 
-This tool can be run on Google Colab, so no Python setup or local operation is neede -- all in the cloud if desired. Check it out at the link above!
+This tool can be run on Google Colab, so no Python setup or local operation is needed -- all in the cloud if desired. Check it out at the link above!
 
 A video walk-thru of this tool can be found here: https://www.youtube.com/watch?v=pu9IpbfckDo
 

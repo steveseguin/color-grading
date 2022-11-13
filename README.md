@@ -20,4 +20,9 @@ If you happen to make a derivation or distribution of this code, commericial or 
 
 ### Example LUT Image for use with OBS
 
+OBS Studio comes with several LUTS, including the neutral one we've used in this repo, as displayed below.
+
 ![image2](https://raw.githubusercontent.com/steveseguin/color-grading/master/neutral-lut.png)
+
+The link to the original source for the above neutral LUT used here is found within the OBS Studio's GitHub, (Linked Here)[https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/plugins/obs-filters/data/LUTs/original.png].  OBS Studio uses a (GPL-2.0 licence)[https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/COPYING], which allows for commercial, private, distribution, and modification. Please see their licence for specifics if intending to use their LUT, as I'm not a lawyer.
+

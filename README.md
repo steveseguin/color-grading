@@ -27,7 +27,7 @@ I created a version that's setup for the Datacolor SpyderCheckr color card:
 
 https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ipynb
 
-<img src="[https://user-images.githubusercontent.com/2575698/120865595-56de3b80-c55c-11eb-8b98-60c59ae0f904.png"](https://raw.githubusercontent.com/steveseguin/color-grading/master/datacolor_sample1.png" height="300" />
+<img src="https://raw.githubusercontent.com/steveseguin/color-grading/master/datacolor_sample1.png" height="300" />
 
 #### Notes on licencing
 

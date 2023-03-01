@@ -21,6 +21,12 @@ OBS Studio comes with several LUTS, including the neutral one we've used in this
 
 ![image2](https://raw.githubusercontent.com/steveseguin/color-grading/master/neutral-lut.png)
 
+### SpyderCheckr 24 color data card
+
+I created a version that's setup for the Datacolor SpyderCheckr color card:
+
+https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ipynb
+
 #### Notes on licencing
 
 The original source for the above neutral LUT used by this repo was found within the OBS Studio's GitHub, [Linked Here](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/plugins/obs-filters/data/LUTs/original.png). OBS Studio uses a [GPLv2 licence](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/COPYING), which allows for commercial and private use, including distribution and modification. Please see their licence for specifics if intending to use their LUT.

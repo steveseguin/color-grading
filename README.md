@@ -21,13 +21,15 @@ OBS Studio comes with several LUTS, including the neutral one we've used in this
 
 ![image2](https://raw.githubusercontent.com/steveseguin/color-grading/master/neutral-lut.png)
 
-### SpyderCheckr 24 color data card
+### Datacolor Spyder Checkr color data card added
 
-I created a version that's setup for the Datacolor SpyderCheckr color card:
+I created a version that's setup for the Datacolor Spyder Checkr color card:
 
 https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ipynb
 
 <img src="https://raw.githubusercontent.com/steveseguin/color-grading/master/datacolor_sample1.png" height="300" />
+
+** I'm using the main 24-color card found in the SCK100 48-color dual card pack in this case. I think there's another 24-color card version that has the colors in a different arrangement? you'll need to move the values around to match  your card if that's the case.  (I bought mine as a 'replacement card' pack, which doesn't come with the case, but it's half the price.  I don't use it often enough to justify needing a case and the added cost.)
 
 ### 3D CUBE LUT support added
 

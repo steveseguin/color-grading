@@ -33,7 +33,7 @@ https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ip
 
 ### 3D CUBE LUT support added
 
-After the PNG LUT is created in the colab script, there's a bit of code that will create a `result.cube` file in the colab files folder (access it on the left side of the colab page I think).  You can save it from there if needed. It's supposedly more accurate than the PNG LUTs normally used by OBS, but newer versions of OBS seem to support the CUBE LUT format. I don't have the gamma/highlight logic applied to the code, but it's pretty straight forward to do so if you want that. 
+After the PNG LUT is created in the colab script, there's a bit of code that will create a `result.cube` file in the colab files folder (access it on the left side of the colab page I think).  You can save it from there if needed. It's supposedly more accurate than the PNG LUTs normally used by OBS, but newer versions of OBS seem to support the CUBE LUT format. The code hasn't been verified to be 100% accurate, but a quick test seems to show it working as expected.
 
 The code should make it pretty easy for a novice developer to convert between LUT types, if you wanted to take things a step further. I'd love to get ICC support added directly to this Python script as well, but if you're looking to create an ICC profile, I think there are some linux command line tools for free that will convert from a 3D LUT to an ICC file. If you can figure that out, you'd be able to calibrate not just OBS, but also perhaps printers, displays, and scanners with just some reference colour test cards.
 

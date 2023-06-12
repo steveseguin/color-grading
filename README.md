@@ -1,4 +1,4 @@
-# LUT Creator (png type) for OBS and other
+# LUT Creator (png+cube type) for OBS and other
 
 
 [![Walk Thru video](http://img.youtube.com/vi/pu9IpbfckDo/0.jpg)](https://www.youtube.com/watch?v=pu9IpbfckDo "Walk thru")

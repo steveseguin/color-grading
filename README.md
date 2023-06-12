@@ -29,6 +29,12 @@ https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ip
 
 <img src="https://raw.githubusercontent.com/steveseguin/color-grading/master/datacolor_sample1.png" height="300" />
 
+### 3D CUBE LUT support added
+
+After the PNG LUT is created in the colab script, there's a bit of code that will create a `result.cube` file in the colab files folder (access it on the left side of the colab page I think).  You can save it from there if needed. It's supposedly more accurate than the PNG LUTs normally used by OBS, but newer versions of OBS seem to support the CUBE LUT format. I don't have the gamma/highlight logic applied to the code, but it's pretty straight forward to do so if you want that. 
+
+The code should make it pretty easy for a novice developer to convert between LUT types, if you wanted to take things a step further. I'd love to get ICC support added directly to this Python script as well, but if you're looking to create an ICC profile, I think there are some linux command line tools for free that will convert from a 3D LUT to an ICC file. If you can figure that out, you'd be able to calibrate not just OBS, but also perhaps printers, displays, and scanners with just some reference colour test cards.
+
 #### Notes on licencing
 
 The original source for the above neutral LUT used by this repo was found within the OBS Studio's GitHub, [Linked Here](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/plugins/obs-filters/data/LUTs/original.png). OBS Studio uses a [GPLv2 licence](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/COPYING), which allows for commercial and private use, including distribution and modification. Please see their licence for specifics if intending to use their LUT.

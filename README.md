@@ -1,45 +1,68 @@
-# LUT Creator (png+cube type) for OBS and other
+# LUT Creator for OBS and other video applications
 
+Create custom PNG and CUBE LUTs to color correct your footage using a color reference card.
+
+## 🌟 NEW: Browser-based LUT Maker Now Available!
+
+**Try the new web-based LUT Maker**: [https://steveseguin.github.io/LUT-maker/](https://steveseguin.github.io/LUT-maker/)
+
+Our new browser-based tool lets you generate custom LUTs without any software installation or Python knowledge. Simply upload a photo of your color reference card and create professional color transformations directly in your browser!
 
 [![Walk Thru video](http://img.youtube.com/vi/pu9IpbfckDo/0.jpg)](https://www.youtube.com/watch?v=pu9IpbfckDo "Walk thru")
 
+## About This Tool
 
-Using accurate Color samples obtained from the local paint shop, I've created a Python script to create a color filter that can be turned into a LUT tool to correct colors in video recordings.  While not ideal for a final processed video/photo, it gets the footage to a standardized point that can be corrected with other LUTs that cannot be dyamically generated. This tool can create custom luts on demand; you just need the color reference card to start.
+Using accurate color samples obtained from the local paint shop, I've created tools to generate color filters that can be turned into LUTs (Look-Up Tables) to correct colors in video recordings. While not ideal for a final processed video/photo, it gets the footage to a standardized point that can be corrected with other LUTs that cannot be dynamically generated.
 
-http://colab.research.google.com/github/steveseguin/color-grading/blob/master/colab.ipynb
+This repository offers two methods to create custom LUTs:
 
-This tool can be run on Google Colab, so no Python setup or local operation is needed -- all in the cloud if desired. Check it out at the link above!
+1. **NEW: Browser-based LUT Maker** - No installation required
+2. **Python-based tool** - Run in Google Colab (no local setup needed)
 
-A video walk-thru of this tool can be found here: https://www.youtube.com/watch?v=pu9IpbfckDo
+## Python Colab Version
 
+The original Python tool can be run on Google Colab, so no Python setup or local operation is needed - everything runs in the cloud.
 
-![image2](https://github.com/steveseguin/color-grading/raw/master/obs-layout.jpg)
+**Access the Colab notebook here**: [http://colab.research.google.com/github/steveseguin/color-grading/blob/master/colab.ipynb](http://colab.research.google.com/github/steveseguin/color-grading/blob/master/colab.ipynb)
 
-### Example LUT Image for use with OBS
+A video walk-through of this tool can be found here: [https://www.youtube.com/watch?v=pu9IpbfckDo](https://www.youtube.com/watch?v=pu9IpbfckDo)
 
-OBS Studio comes with several LUTS, including the neutral one we've used in this repo, as displayed below.
+![OBS Layout with LUT applied](https://github.com/steveseguin/color-grading/raw/master/obs-layout.jpg)
 
-![image2](https://raw.githubusercontent.com/steveseguin/color-grading/master/neutral-lut.png)
+## LUT Types Supported
 
-### Datacolor Spyder Checkr color data card added
+### PNG LUTs for OBS
 
-I created a version that's setup for the Datacolor Spyder Checkr color card:
+OBS Studio comes with several LUTs, including the neutral one we've used in this repo, as displayed below.
 
-https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ipynb
+![Neutral LUT](https://raw.githubusercontent.com/steveseguin/color-grading/master/neutral-lut.png)
+
+### 3D CUBE LUT Support
+
+Both tools can create CUBE format LUTs, which are supported by newer versions of OBS and many other video editing applications. The CUBE format is generally more accurate than PNG LUTs.
+
+If you're using the Python Colab script, after the PNG LUT is created, there's code that will generate a `result.cube` file in the Colab files folder (access it on the left side of the Colab page). You can download it from there as needed.
+
+The code should make it pretty easy for a novice developer to convert between LUT types. I'd love to get ICC support added directly to this Python script as well, but if you're looking to create an ICC profile, there are some Linux command-line tools that will convert from a 3D LUT to an ICC file.
+
+## Color Card Support
+
+### Datacolor Spyder Checkr
+
+I created a version that's set up for the Datacolor Spyder Checkr color card:
+
+[https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ipynb](https://github.com/steveseguin/color-grading/blob/master/spyder_24_color_card.ipynb)
 
 <img src="https://raw.githubusercontent.com/steveseguin/color-grading/master/datacolor_sample1.png" height="300" />
 
-** I'm using the main 24-color card found in the SCK100 48-color dual card pack in this case. I think there's another 24-color card version that has the colors in a different arrangement? you'll need to move the values around to match  your card if that's the case.  (I bought mine as a 'replacement card' pack, which doesn't come with the case, but it's half the price.  I don't use it often enough to justify needing a case and the added cost.)
+**Note:** I'm using the main 24-color card found in the SCK100 48-color dual card pack. There's another 24-color card version that has the colors in a different arrangement; you'll need to move the values around to match your card if that's the case. (I bought mine as a 'replacement card' pack, which doesn't come with the case, but it's half the price. I don't use it often enough to justify needing a case and the added cost.)
 
-### 3D CUBE LUT support added
+## Licensing Information
 
-After the PNG LUT is created in the colab script, there's a bit of code that will create a `result.cube` file in the colab files folder (access it on the left side of the colab page I think).  You can save it from there if needed. It's supposedly more accurate than the PNG LUTs normally used by OBS, but newer versions of OBS seem to support the CUBE LUT format. The code hasn't been verified to be 100% accurate, but a quick test seems to show it working as expected.
+### PNG LUT Source
 
-The code should make it pretty easy for a novice developer to convert between LUT types, if you wanted to take things a step further. I'd love to get ICC support added directly to this Python script as well, but if you're looking to create an ICC profile, I think there are some linux command line tools for free that will convert from a 3D LUT to an ICC file. If you can figure that out, you'd be able to calibrate not just OBS, but also perhaps printers, displays, and scanners with just some reference colour test cards.
+The original source for the neutral PNG LUT file used by this repo was found within the OBS Studio's GitHub, [Linked Here](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/plugins/obs-filters/data/LUTs/original.png). OBS Studio uses a [GPLv2 license](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/COPYING), which allows for commercial and private use, including distribution and modification. Please see their license for specifics if intending to use their LUT. If this is an issue, provide your own PNG LUT or use the 3D CUBE LUT option instead.
 
-#### Notes on licencing
+### My Code License
 
-The original source for the above neutral PNG LUT file used by this repo was found within the OBS Studio's GitHub, [Linked Here](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/plugins/obs-filters/data/LUTs/original.png). OBS Studio uses a [GPLv2 licence](https://github.com/obsproject/obs-studio/blob/19fbc886fad9c2fdf220ab17f30f2389b7f4cbae/COPYING), which allows for commercial and private use, including distribution and modification. Please see their licence for specifics if intending to use their LUT. If this is an issue, provide your own PNG LUT or use the 3D CUBE LUT option instead.
-
-You are free to make derivations and distributions of my Python code, for commericial or private purposes, as allowed by the GPLv3 open-source licence. I went with GPLv3 for my own code. If distributing this code, modified or otherwise, providing a link with it to a fork of my repository with any changes shown I think is sufficient, although I'm not a lawyer and this is not legal advice.
-
+You are free to make derivations and distributions of my Python code, for commercial or private purposes, as allowed by the GPLv3 open-source license. I went with GPLv3 for my own code. If distributing this code, modified or otherwise, providing a link with it to a fork of my repository with any changes shown I think is sufficient, although I'm not a lawyer and this is not legal advice.

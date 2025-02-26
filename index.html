@@ -1137,26 +1137,26 @@ input[type="range"] {
         }
         
         // Load an image file
-        function loadImage(file, type) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                const img = new Image();
-                img.onload = function() {
-                    if (type === 'colorcard') {
-                        state.colorCardImage = img;
-                        displayColorCardImage(img);
-                    } else if (type === 'test') {
-                        state.testImage = img;
-                        displayTestImage(img);
-                        document.getElementById('test-next').disabled = false;
-                    }
-                };
-                img.src = e.target.result;
-            };
-            
-            reader.readAsDataURL(file);
-        }
+		function loadImage(file, type) {
+			const reader = new FileReader();
+			
+			reader.onload = function(e) {
+				const img = new Image();
+				img.onload = function() {
+					if (type === 'colorcard') {
+						state.colorCardImage = img;
+						displayColorCardImage(img);
+					} else if (type === 'test') {
+						state.testImage = img;
+						displayTestImage(img);
+						document.getElementById('test-next').disabled = false;
+					}
+				};
+				img.src = e.target.result;
+			};
+			
+			reader.readAsDataURL(file);
+		}
         
         // Initialize the processing functionality
         function initializeProcessing() {
@@ -1890,20 +1890,28 @@ input[type="range"] {
 		});
 			
         // Load a demo image
-        function loadDemoImage(type) {
-            const demoUrl = type === 'colorcard' 
-                ? 'logcrop.jpg'
-                : 'log.jpg';
-            
-            logMessage(`Loading demo ${type} image...`, 'info');
-            
-            fetch(demoUrl)
-                .then(response => response.blob())
-                .then(blob => {
-                    const file = new File([blob], `demo-${type}.jpg`, { type: 'image/jpeg' });
-                    loadImage(file, 'colorcard');
-                });
-        }
+		function loadDemoImage(type) {
+			const demoUrl = type === 'colorcard' 
+				? 'logcrop.jpg'
+				: 'log.jpg';
+			
+			logMessage(`Loading demo ${type} image...`, 'info');
+			
+			fetch(demoUrl)
+				.then(response => {
+					if (!response.ok) {
+						throw new Error(`Failed to load demo image: ${response.status} ${response.statusText}`);
+					}
+					return response.blob();
+				})
+				.then(blob => {
+					const file = new File([blob], `demo-${type}.jpg`, { type: 'image/jpeg' });
+					loadImage(file, type); // Pass the correct type parameter
+				})
+				.catch(error => {
+					logMessage(`Error loading demo image: ${error.message}`, 'error');
+				});
+		}
         
         // Display the color card image and extract colors
         function displayColorCardImage(img) {

@@ -1,1 +1,1450 @@
-test
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser-based LUT Maker</title>
+    <style>
+        :root {
+            --primary-color: #3a7bd5;
+            --secondary-color: #00d2ff;
+            --dark-color: #333;
+            --light-color: #f4f4f4;
+            --danger-color: #dc3545;
+            --success-color: #28a745;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background: #f8f9fa;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1, h2, h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px 0;
+            transition: opacity 0.2s;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        
+        canvas {
+            border: 1px solid #ddd;
+            margin: 10px 0;
+            max-width: 100%;
+        }
+        
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        
+        .step {
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .step:last-child {
+            border-bottom: none;
+        }
+        
+        .preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .preview img {
+            max-width: 100%;
+            margin: 10px 0;
+        }
+        
+        .controls {
+            margin: 15px 0;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+        }
+        
+        .slider-container label {
+            width: 150px;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            margin: 0 10px;
+        }
+        
+        .slider-value {
+            width: 50px;
+            text-align: center;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin: 10px 0;
+        }
+        
+        .color-cell {
+            aspect-ratio: 1;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        
+        .color-input {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .rgb-input {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .rgb-input label {
+            margin-bottom: 5px;
+        }
+        
+        .rgb-input input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+        
+        .chart-controls {
+            margin: 10px 0;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .tab-container {
+            margin: 20px 0;
+        }
+        
+        .tab-buttons {
+            display: flex;
+            overflow-x: auto;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #f1f1f1;
+            transition: background-color 0.3s;
+        }
+        
+        .tab-btn.active {
+            background-color: white;
+            border-bottom: 3px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .log-container {
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #eee;
+        }
+        
+        .info {
+            color: #0066cc;
+        }
+        
+        .warning {
+            color: #cc9900;
+        }
+        
+        .error {
+            color: #cc0000;
+        }
+        
+        .success {
+            color: #009900;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Browser-based LUT Maker</h1>
+        <p>Create your own custom LUTs for OBS or other applications using color cards.</p>
+    </div>
+    
+    <div class="tab-container">
+        <div class="tab-buttons">
+            <button class="tab-btn active" data-tab="setup">1. Setup</button>
+            <button class="tab-btn" data-tab="reference" disabled>2. Reference Colors</button>
+            <button class="tab-btn" data-tab="colorcard" disabled>3. Color Card</button>
+            <button class="tab-btn" data-tab="process" disabled>4. Process</button>
+            <button class="tab-btn" data-tab="test" disabled>5. Test & Adjust</button>
+            <button class="tab-btn" data-tab="export" disabled>6. Export LUT</button>
+        </div>
+        
+        <div class="tab-content">
+            <!-- Tab 1: Setup -->
+            <div class="tab-panel active" id="setup-tab">
+                <div class="step">
+                    <h2>Welcome to the LUT Maker</h2>
+                    <p>This tool helps you create custom Look-Up Tables (LUTs) for color correction in applications like OBS, based on a photo of a color reference chart.</p>
+                    <p>The process involves these steps:</p>
+                    <ol>
+                        <li>Setup the color grid configuration</li>
+                        <li>Define reference colors for your color chart</li>
+                        <li>Upload a photo of your color chart</li>
+                        <li>Process and create the transformation</li>
+                        <li>Test and adjust the results</li>
+                        <li>Export the final LUT file</li>
+                    </ol>
+                </div>
+                
+                <div class="step">
+                    <h3>Color Grid Configuration</h3>
+                    <p>First, define the layout of your color reference chart:</p>
+                    <div class="controls">
+                        <div class="slider-container">
+                            <label for="rows-slider">Number of Rows:</label>
+                            <input type="range" id="rows-slider" min="1" max="8" value="3" class="slider">
+                            <span id="rows-value" class="slider-value">3</span>
+                        </div>
+                        <div class="slider-container">
+                            <label for="columns-slider">Number of Columns:</label>
+                            <input type="range" id="columns-slider" min="1" max="8" value="3" class="slider">
+                            <span id="columns-value" class="slider-value">3</span>
+                        </div>
+                        <div class="slider-container">
+                            <label for="border-slider">Cell Border Percentage:</label>
+                            <input type="range" id="border-slider" min="0" max="50" value="25" class="slider">
+                            <span id="border-value" class="slider-value">25%</span>
+                        </div>
+                    </div>
+                    <p>This configuration defines how your color chart is laid out and how much border to ignore when analyzing each color block.</p>
+                    <button id="setup-next" class="next-btn">Continue to Reference Colors</button>
+                </div>
+            </div>
+            
+            <!-- Tab 2: Reference Colors -->
+            <div class="tab-panel" id="reference-tab">
+                <div class="step">
+                    <h2>Reference Colors</h2>
+                    <p>Define the RGB values for each color in your reference chart. These are the "correct" colors that your camera should capture.</p>
+                    <p>At minimum, you should include white, gray, and black. Adding other colors will improve the results.</p>
+                    
+                    <div class="grid">
+                        <div>
+                            <h3>Color Grid Preview</h3>
+                            <div id="reference-grid-container">
+                                <div class="color-grid" id="reference-grid"></div>
+                            </div>
+                            <div class="controls">
+                                <button id="reset-colors">Reset Colors</button>
+                                <button id="use-example">Use Example Colors</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3>Selected Color</h3>
+                            <div id="selected-color-preview" style="width: 100px; height: 100px; border: 1px solid #ddd; margin: 10px 0;"></div>
+                            <div id="selected-color-inputs" class="rgb-input">
+                                <label for="red-input">Red (0-255):</label>
+                                <input type="number" id="red-input" min="0" max="255" value="128">
+                                <label for="green-input">Green (0-255):</label>
+                                <input type="number" id="green-input" min="0" max="255" value="128">
+                                <label for="blue-input">Blue (0-255):</label>
+                                <input type="number" id="blue-input" min="0" max="255" value="128">
+                                <button id="update-color" style="margin-top: 10px;">Update Color</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="reference-prev" class="prev-btn">Back</button>
+                        <button id="reference-next" class="next-btn">Continue to Color Card</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 3: Color Card Photo -->
+            <div class="tab-panel" id="colorcard-tab">
+                <div class="step">
+                    <h2>Upload Color Card Photo</h2>
+                    <p>Upload a photo of your color reference chart taken with your camera under the lighting conditions you wish to create your LUT for.</p>
+                    <p>Make sure the photo is well-lit and the entire color chart is visible and not distorted.</p>
+                    
+                    <div class="controls">
+                        <input type="file" id="colorcard-upload" accept="image/*">
+                        <button id="use-demo-image">Use Demo Image</button>
+                    </div>
+                    
+                    <div class="preview">
+                        <h3>Preview</h3>
+                        <canvas id="colorcard-preview"></canvas>
+                        <div id="colorcard-info"></div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="colorcard-prev" class="prev-btn">Back</button>
+                        <button id="colorcard-next" class="next-btn" disabled>Continue to Processing</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 4: Process -->
+            <div class="tab-panel" id="process-tab">
+                <div class="step">
+                    <h2>Process Color Transformation</h2>
+                    <p>Extract colors from your photo and create the color transformation.</p>
+                    
+                    <div class="grid">
+                        <div>
+                            <h3>Target Colors</h3>
+                            <div class="color-grid" id="target-grid"></div>
+                        </div>
+                        <div>
+                            <h3>Captured Colors</h3>
+                            <div class="color-grid" id="captured-grid"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <div class="slider-container">
+                            <label for="polynomial-slider">Polynomial Degree:</label>
+                            <input type="range" id="polynomial-slider" min="1" max="3" value="1" class="slider">
+                            <span id="polynomial-value" class="slider-value">1</span>
+                        </div>
+                        <button id="process-button">Process Color Transformation</button>
+                    </div>
+                    
+                    <div class="log-container" id="process-log"></div>
+                    
+                    <div class="progress-container" id="process-progress-container">
+                        <div class="progress-bar" id="process-progress-bar"></div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="process-prev" class="prev-btn">Back</button>
+                        <button id="process-next" class="next-btn" disabled>Continue to Testing</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 5: Test & Adjust -->
+            <div class="tab-panel" id="test-tab">
+                <div class="step">
+                    <h2>Test and Adjust Results</h2>
+                    <p>Upload a test image to see how the color transformation affects it, and make adjustments if needed.</p>
+                    
+                    <div class="controls">
+                        <input type="file" id="test-upload" accept="image/*">
+                        <button id="use-demo-test">Use Demo Test Image</button>
+                    </div>
+                    
+                    <div class="preview">
+                        <h3>Test Image Preview</h3>
+                        <div class="grid">
+                            <div>
+                                <h4>Original</h4>
+                                <canvas id="test-original"></canvas>
+                            </div>
+                            <div>
+                                <h4>Processed</h4>
+                                <canvas id="test-processed"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <div class="slider-container">
+                            <label for="brightness-slider">Brightness Adjustment:</label>
+                            <input type="range" id="brightness-slider" min="-50" max="50" value="0" class="slider">
+                            <span id="brightness-value" class="slider-value">0</span>
+                        </div>
+                        <div class="slider-container">
+                            <label for="gamma-slider">Gamma Adjustment:</label>
+                            <input type="range" id="gamma-slider" min="0.5" max="2.5" value="1" step="0.1" class="slider">
+                            <span id="gamma-value" class="slider-value">1.0</span>
+                        </div>
+                        <button id="apply-adjustments">Apply Adjustments</button>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="test-prev" class="prev-btn">Back</button>
+                        <button id="test-next" class="next-btn" disabled>Continue to Export</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 6: Export LUT -->
+            <div class="tab-panel" id="export-tab">
+                <div class="step">
+                    <h2>Export LUT</h2>
+                    <p>Generate and download your custom LUT file.</p>
+                    
+                    <div class="controls">
+                        <div class="slider-container">
+                            <label for="lut-size-slider">LUT Size:</label>
+                            <input type="range" id="lut-size-slider" min="16" max="64" value="32" step="16" class="slider">
+                            <span id="lut-size-value" class="slider-value">32</span>
+                        </div>
+                        <div class="slider-container">
+                            <label for="lut-format">LUT Format:</label>
+                            <select id="lut-format">
+                                <option value="png">PNG (OBS compatible)</option>
+                                <option value="cube">CUBE</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="generate-lut">Generate LUT</button>
+                    </div>
+                    
+                    <div class="progress-container" id="export-progress-container">
+                        <div class="progress-bar" id="export-progress-bar"></div>
+                    </div>
+                    
+                    <div class="preview">
+                        <h3>LUT Preview</h3>
+                        <canvas id="lut-preview"></canvas>
+                        <div id="lut-download-container" style="display: none;">
+                            <button id="download-lut">Download LUT</button>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="export-prev" class="prev-btn">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Main app state
+        const state = {
+            rows: 3,
+            columns: 3,
+            cellBorderPercentage: 25,
+            referenceColors: [],
+            capturedColors: [],
+            selectedCellIndex: null,
+            colorCardImage: null,
+            testImage: null,
+            processedTestImage: null,
+            polynomialDegree: 1,
+            brightnessAdjustment: 0,
+            gammaValue: 1.0,
+            lutSize: 32,
+            lutFormat: 'png',
+            transformationCoefficients: {
+                red: null,
+                green: null,
+                blue: null
+            },
+            lutImage: null
+        };
+        
+        // Initialize UI
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeSliders();
+            initializeTabs();
+            initializeReferenceGrid();
+            initializeColorCardUpload();
+            initializeTestImageUpload();
+            initializeProcessing();
+            initializeExport();
+            initializeEventListeners();
+            
+            // Log welcome message
+            logMessage('Welcome to the Browser-based LUT Maker!', 'info');
+        });
+        
+        // Initialize sliders and inputs
+        function initializeSliders() {
+            // Rows slider
+            const rowsSlider = document.getElementById('rows-slider');
+            const rowsValue = document.getElementById('rows-value');
+            rowsSlider.addEventListener('input', function() {
+                state.rows = parseInt(this.value);
+                rowsValue.textContent = state.rows;
+                initializeReferenceGrid();
+            });
+            
+            // Columns slider
+            const columnsSlider = document.getElementById('columns-slider');
+            const columnsValue = document.getElementById('columns-value');
+            columnsSlider.addEventListener('input', function() {
+                state.columns = parseInt(this.value);
+                columnsValue.textContent = state.columns;
+                initializeReferenceGrid();
+            });
+            
+            // Cell border slider
+            const borderSlider = document.getElementById('border-slider');
+            const borderValue = document.getElementById('border-value');
+            borderSlider.addEventListener('input', function() {
+                state.cellBorderPercentage = parseInt(this.value);
+                borderValue.textContent = state.cellBorderPercentage + '%';
+            });
+            
+            // Polynomial degree slider
+            const polySlider = document.getElementById('polynomial-slider');
+            const polyValue = document.getElementById('polynomial-value');
+            polySlider.addEventListener('input', function() {
+                state.polynomialDegree = parseInt(this.value);
+                polyValue.textContent = state.polynomialDegree;
+            });
+            
+            // Brightness slider
+            const brightnessSlider = document.getElementById('brightness-slider');
+            const brightnessValue = document.getElementById('brightness-value');
+            brightnessSlider.addEventListener('input', function() {
+                state.brightnessAdjustment = parseInt(this.value);
+                brightnessValue.textContent = state.brightnessAdjustment;
+            });
+            
+            // Gamma slider
+            const gammaSlider = document.getElementById('gamma-slider');
+            const gammaValue = document.getElementById('gamma-value');
+            gammaSlider.addEventListener('input', function() {
+                state.gammaValue = parseFloat(this.value);
+                gammaValue.textContent = state.gammaValue.toFixed(1);
+            });
+            
+            // LUT size slider
+            const lutSizeSlider = document.getElementById('lut-size-slider');
+            const lutSizeValue = document.getElementById('lut-size-value');
+            lutSizeSlider.addEventListener('input', function() {
+                state.lutSize = parseInt(this.value);
+                lutSizeValue.textContent = state.lutSize;
+            });
+            
+            // LUT format select
+            const lutFormat = document.getElementById('lut-format');
+            lutFormat.addEventListener('change', function() {
+                state.lutFormat = this.value;
+            });
+        }
+        
+        // Helper function to log messages
+        function logMessage(message, type = 'info') {
+            const logContainer = document.getElementById('process-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = message;
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+        
+        // Update progress bar
+        function updateProgress(containerId, value) {
+            const progressBar = document.getElementById(`${containerId}-progress-bar`);
+            progressBar.style.width = `${value}%`;
+        }
+        
+        // RGB to Hex conversion
+        function rgbToHex(rgb) {
+            return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
+        }
+        
+        // Update the captured colors grid
+        function updateCapturedColorsGrid() {
+            const gridContainer = document.getElementById('captured-grid');
+            gridContainer.innerHTML = '';
+            gridContainer.style.gridTemplateColumns = `repeat(${state.columns}, 1fr)`;
+            
+            for (let i = 0; i < state.capturedColors.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'color-cell';
+                cell.style.backgroundColor = rgbToHex(state.capturedColors[i]);
+                gridContainer.appendChild(cell);
+            }
+            
+            // Also update target grid
+            const targetGrid = document.getElementById('target-grid');
+            targetGrid.innerHTML = '';
+            targetGrid.style.gridTemplateColumns = `repeat(${state.columns}, 1fr)`;
+            
+            for (let i = 0; i < state.referenceColors.length; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'color-cell';
+                cell.style.backgroundColor = rgbToHex(state.referenceColors[i]);
+                targetGrid.appendChild(cell);
+            }
+        }
+        
+        // Initialize tabs
+        function initializeTabs() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanels = document.querySelectorAll('.tab-panel');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Only allow clicking on enabled tabs
+                    if (this.disabled) return;
+                    
+                    // Deactivate all tabs
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanels.forEach(panel => panel.classList.remove('active'));
+                    
+                    // Activate the clicked tab
+                    this.classList.add('active');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Next button handlers
+            document.getElementById('setup-next').addEventListener('click', function() {
+                enableTab('reference');
+                activateTab('reference');
+            });
+            
+            document.getElementById('reference-next').addEventListener('click', function() {
+                enableTab('colorcard');
+                activateTab('colorcard');
+            });
+            
+            document.getElementById('colorcard-next').addEventListener('click', function() {
+                enableTab('process');
+                activateTab('process');
+            });
+            
+            document.getElementById('process-next').addEventListener('click', function() {
+                enableTab('test');
+                activateTab('test');
+            });
+            
+            document.getElementById('test-next').addEventListener('click', function() {
+                enableTab('export');
+                activateTab('export');
+            });
+            
+            // Previous button handlers
+            document.getElementById('reference-prev').addEventListener('click', function() {
+                activateTab('setup');
+            });
+            
+            document.getElementById('colorcard-prev').addEventListener('click', function() {
+                activateTab('reference');
+            });
+            
+            document.getElementById('process-prev').addEventListener('click', function() {
+                activateTab('colorcard');
+            });
+            
+            document.getElementById('test-prev').addEventListener('click', function() {
+                activateTab('process');
+            });
+            
+            document.getElementById('export-prev').addEventListener('click', function() {
+                activateTab('test');
+            });
+        }
+        
+        // Enable a tab
+        function enableTab(tabId) {
+            const tabButton = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+            if (tabButton) {
+                tabButton.disabled = false;
+            }
+        }
+        
+        // Activate a tab
+        function activateTab(tabId) {
+            const tabButton = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+            if (tabButton && !tabButton.disabled) {
+                tabButton.click();
+            }
+        }
+        
+        // Initialize reference color grid
+        function initializeReferenceGrid() {
+            const gridContainer = document.getElementById('reference-grid');
+            gridContainer.innerHTML = '';
+            gridContainer.style.gridTemplateColumns = `repeat(${state.columns}, 1fr)`;
+            
+            // Initialize with default colors if not already set
+            if (state.referenceColors.length !== state.rows * state.columns) {
+                state.referenceColors = Array(state.rows * state.columns).fill().map(() => [128, 128, 128]);
+            }
+            
+            // Create color cells
+            for (let i = 0; i < state.rows * state.columns; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'color-cell';
+                cell.dataset.index = i;
+                cell.style.backgroundColor = rgbToHex(state.referenceColors[i]);
+                
+                cell.addEventListener('click', function() {
+                    selectCell(parseInt(this.dataset.index));
+                });
+                
+                gridContainer.appendChild(cell);
+            }
+        }
+        
+        // Select a color cell
+        function selectCell(index) {
+            state.selectedCellIndex = index;
+            
+            // Update all cell borders
+            const cells = document.querySelectorAll('.color-cell');
+            cells.forEach(cell => {
+                cell.style.border = '1px solid #ddd';
+            });
+            
+            // Highlight selected cell
+            const selectedCell = document.querySelector(`.color-cell[data-index="${index}"]`);
+            if (selectedCell) {
+                selectedCell.style.border = '3px solid #000';
+            }
+            
+            // Update color inputs
+            const [r, g, b] = state.referenceColors[index];
+            document.getElementById('red-input').value = r;
+            document.getElementById('green-input').value = g;
+            document.getElementById('blue-input').value = b;
+            
+            // Update color preview
+            const colorPreview = document.getElementById('selected-color-preview');
+            colorPreview.style.backgroundColor = rgbToHex(state.referenceColors[index]);
+        }
+        
+        // Initialize color card upload
+        function initializeColorCardUpload() {
+            const fileInput = document.getElementById('colorcard-upload');
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    loadImage(file, 'colorcard');
+                }
+            });
+            
+            // Demo image button
+            document.getElementById('use-demo-image').addEventListener('click', function() {
+                loadDemoImage('colorcard');
+            });
+        }
+        
+        // Display the color card image and extract colors
+        function displayColorCardImage(img) {
+            const canvas = document.getElementById('colorcard-preview');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            const maxWidth = 600;
+            const scale = Math.min(1, maxWidth / img.width);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            
+            // Draw image
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Show image info
+            const info = document.getElementById('colorcard-info');
+            info.textContent = `Image loaded: ${img.width}×${img.height} pixels`;
+            
+            // Extract colors from the image
+            extractColorsFromImage(img);
+        }
+        
+        // Initialize test image upload
+        function initializeTestImageUpload() {
+            const fileInput = document.getElementById('test-upload');
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    loadImage(file, 'test');
+                }
+            });
+            
+            // Demo image button
+            document.getElementById('use-demo-test').addEventListener('click', function() {
+                loadDemoImage('test');
+            });
+            
+            // Apply adjustments button
+            document.getElementById('apply-adjustments').addEventListener('click', function() {
+                if (state.testImage) {
+                    processTestImage();
+                }
+            });
+        }
+        
+        // Display the test image
+        function displayTestImage(img) {
+            // Original image
+            const originalCanvas = document.getElementById('test-original');
+            const originalCtx = originalCanvas.getContext('2d');
+            
+            // Set canvas size
+            const maxWidth = 400;
+            const scale = Math.min(1, maxWidth / img.width);
+            originalCanvas.width = img.width * scale;
+            originalCanvas.height = img.height * scale;
+            
+            // Draw original image
+            originalCtx.drawImage(img, 0, 0, originalCanvas.width, originalCanvas.height);
+            
+            // Processed image (initial version is same as original)
+            const processedCanvas = document.getElementById('test-processed');
+            const processedCtx = processedCanvas.getContext('2d');
+            
+            processedCanvas.width = originalCanvas.width;
+            processedCanvas.height = originalCanvas.height;
+            processedCtx.drawImage(img, 0, 0, processedCanvas.width, processedCanvas.height);
+            
+            // Process the test image
+            processTestImage();
+        }
+        
+        // Load a demo image
+        function loadDemoImage(type) {
+            const demoUrl = type === 'colorcard' 
+                ? 'https://raw.githubusercontent.com/steveseguin/color-grading/master/logcrop.jpg'
+                : 'https://raw.githubusercontent.com/steveseguin/color-grading/master/log.jpg';
+            
+            logMessage(`Loading demo ${type} image...`, 'info');
+            
+            fetch(demoUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], `demo-${type}.jpg`, { type: 'image/jpeg' });
+                    loadImage(file, type);
+                    logMessage(`Demo ${type} image loaded successfully`, 'success');
+                })
+                .catch(error => {
+                    logMessage(`Error loading demo image: ${error}`, 'error');
+                });
+        }
+        
+        // Extract colors from the color card image
+        function extractColorsFromImage(img) {
+            logMessage('Extracting colors from image...', 'info');
+            
+            // Create a temporary canvas to process the image
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
+            tempCtx.drawImage(img, 0, 0);
+            
+            // Extract colors from each cell
+            state.capturedColors = [];
+            
+            for (let row = 0; row < state.rows; row++) {
+                for (let col = 0; col < state.columns; col++) {
+                    // Calculate cell boundaries with border percentage
+                    const cellWidth = img.width / state.columns;
+                    const cellHeight = img.height / state.rows;
+                    
+                    const borderX = (state.cellBorderPercentage / 100) * cellWidth / 2;
+                    const borderY = (state.cellBorderPercentage / 100) * cellHeight / 2;
+                    
+                    const x = Math.floor(col * cellWidth + borderX);
+                    const y = Math.floor(row * cellHeight + borderY);
+                    const width = Math.floor(cellWidth - 2 * borderX);
+                    const height = Math.floor(cellHeight - 2 * borderY);
+                    
+                    // Get the cell data
+                    const cellData = tempCtx.getImageData(x, y, width, height);
+                    
+                    // Calculate color histograms to find peak values
+                    const rHistogram = new Array(256).fill(0);
+                    const gHistogram = new Array(256).fill(0);
+                    const bHistogram = new Array(256).fill(0);
+                    
+                    for (let i = 0; i < cellData.data.length; i += 4) {
+                        rHistogram[cellData.data[i]]++;
+                        gHistogram[cellData.data[i + 1]]++;
+                        bHistogram[cellData.data[i + 2]]++;
+                    }
+                    
+                    // Find peak values
+                    const r = rHistogram.indexOf(Math.max(...rHistogram));
+                    const g = gHistogram.indexOf(Math.max(...gHistogram));
+                    const b = bHistogram.indexOf(Math.max(...bHistogram));
+                    
+                    state.capturedColors.push([r, g, b]);
+                }
+            }
+            
+            // Update the captured colors grid
+            updateCapturedColorsGrid();
+            
+            logMessage('Color extraction complete', 'success');
+        }
+        
+        // Load an image file
+        function loadImage(file, type) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    if (type === 'colorcard') {
+                        state.colorCardImage = img;
+                        displayColorCardImage(img);
+                        document.getElementById('colorcard-next').disabled = false;
+                    } else if (type === 'test') {
+                        state.testImage = img;
+                        displayTestImage(img);
+                        document.getElementById('test-next').disabled = false;
+                    }
+                };
+                img.src = e.target.result;
+            };
+            
+            reader.readAsDataURL(file);
+        }
+        
+        // Process the color transformation
+        function processColorTransformation() {
+            logMessage('Starting color transformation processing...', 'info');
+            
+            if (state.capturedColors.length === 0) {
+                logMessage('No captured colors found. Please upload a color card image first.', 'error');
+                return;
+            }
+            
+            if (state.referenceColors.length === 0) {
+                logMessage('No reference colors defined. Please set up your reference colors first.', 'error');
+                return;
+            }
+            
+            // Polynomial regression for each channel (R, G, B)
+            try {
+                // Process red channel
+                updateProgress('process', 10);
+                state.transformationCoefficients.red = polynomialRegression(
+                    state.capturedColors.map(color => color[0]),
+                    state.referenceColors.map(color => color[0]),
+                    state.polynomialDegree
+                );
+                logMessage('Red channel transformation calculated', 'info');
+                
+                // Process green channel
+                updateProgress('process', 40);
+                state.transformationCoefficients.green = polynomialRegression(
+                    state.capturedColors.map(color => color[1]),
+                    state.referenceColors.map(color => color[1]),
+                    state.polynomialDegree
+                );
+                logMessage('Green channel transformation calculated', 'info');
+                
+                // Process blue channel
+                updateProgress('process', 70);
+                state.transformationCoefficients.blue = polynomialRegression(
+                    state.capturedColors.map(color => color[2]),
+                    state.referenceColors.map(color => color[2]),
+                    state.polynomialDegree
+                );
+                logMessage('Blue channel transformation calculated', 'info');
+                
+                updateProgress('process', 100);
+                logMessage('Color transformation processing complete!', 'success');
+                
+                // Enable next step
+                document.getElementById('process-next').disabled = false;
+                
+                // If a test image is already loaded, process it with the new coefficients
+                if (state.testImage) {
+                    processTestImage();
+                }
+            } catch (error) {
+                logMessage(`Error processing color transformation: ${error}`, 'error');
+            }
+        }
+        
+        // Polynomial regression function
+        function polynomialRegression(x, y, degree) {
+            if (x.length !== y.length) {
+                throw new Error('Input arrays must have the same length');
+            }
+            
+            const n = x.length;
+            const coefficients = new Array(degree + 1).fill(0);
+            
+            // For simple linear regression (degree 1)
+            if (degree === 1) {
+                let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+                
+                for (let i = 0; i < n; i++) {
+                    sumX += x[i];
+                    sumY += y[i];
+                    sumXY += x[i] * y[i];
+                    sumX2 += x[i] * x[i];
+                }
+                
+                const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+                const intercept = (sumY - slope * sumX) / n;
+                
+                coefficients[0] = intercept;
+                coefficients[1] = slope;
+            } else {
+                // For higher degree polynomials we need to solve a system of linear equations
+                // Using normal equations: (X^T * X) * beta = X^T * y
+                
+                // Create design matrix X
+                const X = [];
+                for (let i = 0; i < n; i++) {
+                    const row = [];
+                    for (let j = 0; j <= degree; j++) {
+                        row.push(Math.pow(x[i], j));
+                    }
+                    X.push(row);
+                }
+                
+                // Calculate X^T * X
+                const XtX = [];
+                for (let i = 0; i <= degree; i++) {
+                    XtX[i] = [];
+                    for (let j = 0; j <= degree; j++) {
+                        let sum = 0;
+                        for (let k = 0; k < n; k++) {
+                            sum += X[k][i] * X[k][j];
+                        }
+                        XtX[i][j] = sum;
+                    }
+                }
+                
+                // Calculate X^T * y
+                const Xty = [];
+                for (let i = 0; i <= degree; i++) {
+                    let sum = 0;
+                    for (let k = 0; k < n; k++) {
+                        sum += X[k][i] * y[k];
+                    }
+                    Xty[i] = sum;
+                }
+                
+                // Solve system of linear equations using Gaussian elimination
+                // Augmented matrix [XtX|Xty]
+                const augmentedMatrix = [];
+                for (let i = 0; i <= degree; i++) {
+                    augmentedMatrix[i] = [...XtX[i], Xty[i]];
+                }
+                
+                // Gaussian elimination
+                for (let i = 0; i <= degree; i++) {
+                    // Find pivot
+                    let maxRow = i;
+                    for (let j = i + 1; j <= degree; j++) {
+                        if (Math.abs(augmentedMatrix[j][i]) > Math.abs(augmentedMatrix[maxRow][i])) {
+                            maxRow = j;
+                        }
+                    }
+                    
+                    // Swap rows
+                    if (maxRow !== i) {
+                        [augmentedMatrix[i], augmentedMatrix[maxRow]] = [augmentedMatrix[maxRow], augmentedMatrix[i]];
+                    }
+                    
+                    // Eliminate below
+                    for (let j = i + 1; j <= degree; j++) {
+                        const factor = augmentedMatrix[j][i] / augmentedMatrix[i][i];
+                        for (let k = i; k <= degree + 1; k++) {
+                            augmentedMatrix[j][k] -= factor * augmentedMatrix[i][k];
+                        }
+                    }
+                }
+                
+                // Back substitution
+                for (let i = degree; i >= 0; i--) {
+                    let sum = 0;
+                    for (let j = i + 1; j <= degree; j++) {
+                        sum += augmentedMatrix[i][j] * coefficients[j];
+                    }
+                    coefficients[i] = (augmentedMatrix[i][degree + 1] - sum) / augmentedMatrix[i][i];
+                }
+            }
+            
+            return coefficients;
+        }
+        
+        // Apply polynomial transformation to a value
+        function applyPolynomial(value, coefficients) {
+            let result = 0;
+            for (let i = 0; i < coefficients.length; i++) {
+                result += coefficients[i] * Math.pow(value, i);
+            }
+            return result;
+        }
+        
+        // Process the test image with the current transformation
+        function processTestImage() {
+            if (!state.testImage || !state.transformationCoefficients.red) {
+                return;
+            }
+            
+            logMessage('Processing test image...', 'info');
+            
+            // Create temporary canvas for processing
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCanvas.width = state.testImage.width;
+            tempCanvas.height = state.testImage.height;
+            tempCtx.drawImage(state.testImage, 0, 0);
+            
+            // Get image data
+            const imageData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            
+            // Create gamma curves
+            const gammaValue = state.gammaValue;
+            const gammaLookup = new Array(256);
+            for (let i = 0; i < 256; i++) {
+                gammaLookup[i] = Math.min(255, Math.max(0, Math.pow(i / 255, 1 / gammaValue) * 255));
+            }
+            
+            // Process each pixel
+            for (let i = 0; i < data.length; i += 4) {
+                // Apply color transformation
+                let r = applyPolynomial(data[i], state.transformationCoefficients.red);
+                let g = applyPolynomial(data[i + 1], state.transformationCoefficients.green);
+                let b = applyPolynomial(data[i + 2], state.transformationCoefficients.blue);
+                
+                // Apply brightness adjustment
+                r += state.brightnessAdjustment;
+                g += state.brightnessAdjustment;
+                b += state.brightnessAdjustment;
+                
+                // Apply gamma correction
+                r = gammaLookup[Math.min(255, Math.max(0, Math.round(r)))];
+                g = gammaLookup[Math.min(255, Math.max(0, Math.round(g)))];
+                b = gammaLookup[Math.min(255, Math.max(0, Math.round(b)))];
+                
+                // Set the data
+                data[i] = r;
+                data[i + 1] = g;
+                data[i + 2] = b;
+            }
+            
+            // Put the image data back
+            tempCtx.putImageData(imageData, 0, 0);
+            
+            // Display the processed image
+            const processedCanvas = document.getElementById('test-processed');
+            const processedCtx = processedCanvas.getContext('2d');
+            
+            processedCtx.clearRect(0, 0, processedCanvas.width, processedCanvas.height);
+            processedCtx.drawImage(tempCanvas, 0, 0, processedCanvas.width, processedCanvas.height);
+            
+            logMessage('Test image processing complete', 'success');
+        }
+        
+        // Generate LUT
+        function generateLUT() {
+            if (!state.transformationCoefficients.red) {
+                logMessage('No color transformation available. Please process colors first.', 'error');
+                return;
+            }
+            
+            logMessage('Generating LUT...', 'info');
+            updateProgress('export', 0);
+            
+            // Create canvas for the LUT
+            const lutCanvas = document.getElementById('lut-preview');
+            const lutCtx = lutCanvas.getContext('2d');
+            
+            if (state.lutFormat === 'png') {
+                // For PNG LUT (OBS compatible)
+                lutCanvas.width = 64;
+                lutCanvas.height = 64;
+                
+                // Clear canvas
+                lutCtx.clearRect(0, 0, lutCanvas.width, lutCanvas.height);
+                
+                // Generate neutral LUT data
+                const lutData = lutCtx.createImageData(64, 64);
+                const data = lutData.data;
+                
+                let i = 0;
+                for (let b = 0; b < 8; b++) {
+                    for (let g = 0; g < 8; g++) {
+                        for (let r = 0; r < 8; r++) {
+                            const index = (b * 8 + g) * 32 + r * 4;
+                            data[index] = r * 255 / 7;     // R
+                            data[index + 1] = g * 255 / 7; // G
+                            data[index + 2] = b * 255 / 7; // B
+                            data[index + 3] = 255;         // A
+                            
+                            updateProgress('export', i++ / (8 * 8 * 8) * 50);
+                        }
+                    }
+                }
+                
+                // Apply transformation to LUT
+                for (let i = 0; i < data.length; i += 4) {
+                    // Get original values
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    
+                    // Apply color transformation
+                    let newR = applyPolynomial(r, state.transformationCoefficients.red);
+                    let newG = applyPolynomial(g, state.transformationCoefficients.green);
+                    let newB = applyPolynomial(b, state.transformationCoefficients.blue);
+                    
+                    // Apply brightness adjustment
+                    newR += state.brightnessAdjustment;
+                    newG += state.brightnessAdjustment;
+                    newB += state.brightnessAdjustment;
+                    
+                    // Apply gamma (using lookup table)
+                    const gammaValue = state.gammaValue;
+                    if (gammaValue !== 1.0) {
+                        // Create simple gamma lookup
+                        newR = Math.pow(newR / 255, 1 / gammaValue) * 255;
+                        newG = Math.pow(newG / 255, 1 / gammaValue) * 255;
+                        newB = Math.pow(newB / 255, 1 / gammaValue) * 255;
+                    }
+                    
+                    // Clamp values
+                    data[i] = Math.min(255, Math.max(0, Math.round(newR)));
+                    data[i + 1] = Math.min(255, Math.max(0, Math.round(newG)));
+                    data[i + 2] = Math.min(255, Math.max(0, Math.round(newB)));
+                    
+                    updateProgress('export', 50 + (i / data.length) * 40);
+                }
+                
+                // Put the data back to the canvas
+                lutCtx.putImageData(lutData, 0, 0);
+                
+            } else if (state.lutFormat === 'cube') {
+                // For CUBE LUT
+                const lutSize = state.lutSize;
+                const cubeData = [];
+                
+                // Generate header
+                let cubeText = `# LUT generated by Browser-based LUT Maker\n`;
+                cubeText += `# Created: ${new Date().toISOString()}\n`;
+                cubeText += `LUT_3D_SIZE ${lutSize}\n\n`;
+                
+                // Generate data points
+                let count = 0;
+                const totalCount = lutSize * lutSize * lutSize;
+                
+                for (let b = 0; b < lutSize; b++) {
+                    for (let g = 0; g < lutSize; g++) {
+                        for (let r = 0; r < lutSize; r++) {
+                            // Original normalized values
+                            const origR = r / (lutSize - 1);
+                            const origG = g / (lutSize - 1);
+                            const origB = b / (lutSize - 1);
+                            
+                            // Apply transformation
+                            let newR = applyPolynomial(origR * 255, state.transformationCoefficients.red) / 255;
+                            let newG = applyPolynomial(origG * 255, state.transformationCoefficients.green) / 255;
+                            let newB = applyPolynomial(origB * 255, state.transformationCoefficients.blue) / 255;
+                            
+                            // Apply brightness adjustment
+                            newR += state.brightnessAdjustment / 255;
+                            newG += state.brightnessAdjustment / 255;
+                            newB += state.brightnessAdjustment / 255;
+                            
+                            // Apply gamma
+                            const gammaValue = state.gammaValue;
+                            if (gammaValue !== 1.0) {
+                                newR = Math.pow(newR, 1 / gammaValue);
+                                newG = Math.pow(newG, 1 / gammaValue);
+                                newB = Math.pow(newB, 1 / gammaValue);
+                            }
+                            
+                            // Clamp values between 0 and 1
+                            newR = Math.min(1, Math.max(0, newR));
+                            newG = Math.min(1, Math.max(0, newG));
+                            newB = Math.min(1, Math.max(0, newB));
+                            
+                            // Add to CUBE data
+                            cubeText += `${newR.toFixed(6)} ${newG.toFixed(6)} ${newB.toFixed(6)}\n`;
+                            
+                            count++;
+                            updateProgress('export', (count / totalCount) * 90);
+                        }
+                    }
+                }
+                
+                // Store the CUBE data
+                state.cubeData = cubeText;
+                
+                // Create a preview of the LUT
+                lutCanvas.width = 256;
+                lutCanvas.height = 16;
+                lutCtx.clearRect(0, 0, lutCanvas.width, lutCanvas.height);
+                
+                // Draw a gradient to visualize the LUT
+                const gradient = lutCtx.createLinearGradient(0, 0, lutCanvas.width, 0);
+                for (let i = 0; i <= 1; i += 0.1) {
+                    // Original color
+                    const r = i * 255;
+                    const g = i * 255;
+                    const b = i * 255;
+                    
+                    // Transformed color
+                    let newR = applyPolynomial(r, state.transformationCoefficients.red);
+                    let newG = applyPolynomial(g, state.transformationCoefficients.green);
+                    let newB = applyPolynomial(b, state.transformationCoefficients.blue);
+                    
+                    // Apply brightness and gamma
+                    newR += state.brightnessAdjustment;
+                    newG += state.brightnessAdjustment;
+                    newB += state.brightnessAdjustment;
+                    
+                    if (state.gammaValue !== 1.0) {
+                        newR = Math.pow(newR / 255, 1 / state.gammaValue) * 255;
+                        newG = Math.pow(newG / 255, 1 / state.gammaValue) * 255;
+                        newB = Math.pow(newB / 255, 1 / state.gammaValue) * 255;
+                    }
+                    
+                    // Clamp values
+                    newR = Math.min(255, Math.max(0, Math.round(newR)));
+                    newG = Math.min(255, Math.max(0, Math.round(newG)));
+                    newB = Math.min(255, Math.max(0, Math.round(newB)));
+                    
+                    const color = `rgb(${newR}, ${newG}, ${newB})`;
+                    gradient.addColorStop(i, color);
+                }
+                
+                lutCtx.fillStyle = gradient;
+                lutCtx.fillRect(0, 0, lutCanvas.width, lutCanvas.height);
+            }
+            
+            updateProgress('export', 100);
+            logMessage('LUT generation complete!', 'success');
+            
+            // Show download button
+            document.getElementById('lut-download-container').style.display = 'block';
+        }
+        
+        // Download the generated LUT
+        function downloadLUT() {
+            if (state.lutFormat === 'png') {
+                const lutCanvas = document.getElementById('lut-preview');
+                const dataURL = lutCanvas.toDataURL('image/png');
+                const a = document.createElement('a');
+                a.href = dataURL;
+                a.download = 'custom-lut.png';
+                a.click();
+            } else if (state.lutFormat === 'cube' && state.cubeData) {
+                const blob = new Blob([state.cubeData], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'custom-lut.cube';
+                a.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+</script>
+</body>
+</html>

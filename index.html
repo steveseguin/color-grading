@@ -5,271 +5,474 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Browser-based LUT Maker</title>
     <style>
-        :root {
-            --primary-color: #3a7bd5;
-            --secondary-color: #00d2ff;
-            --dark-color: #333;
-            --light-color: #f4f4f4;
-            --danger-color: #dc3545;
-            --success-color: #28a745;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--dark-color);
-            background: #f8f9fa;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        h1, h2, h3 {
-            margin-bottom: 10px;
-            color: var(--primary-color);
-        }
-        
-        button {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 5px 0;
-            transition: opacity 0.2s;
-        }
-        
-        button:hover {
-            opacity: 0.9;
-        }
-        
-        button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-        
-        input[type="file"] {
-            margin: 10px 0;
-        }
-        
-        canvas {
-            border: 1px solid #ddd;
-            margin: 10px 0;
-            max-width: 100%;
-        }
-        
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-        
-        .step {
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .step:last-child {
-            border-bottom: none;
-        }
-        
-        .preview {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .preview img {
-            max-width: 100%;
-            margin: 10px 0;
-        }
-        
-        .controls {
-            margin: 15px 0;
-        }
-        
-        .slider-container {
-            display: flex;
-            align-items: center;
-            margin: 10px 0;
-        }
-        
-        .slider-container label {
-            width: 150px;
-        }
-        
-        input[type="range"] {
-            flex: 1;
-            margin: 0 10px;
-        }
-        
-        .slider-value {
-            width: 50px;
-            text-align: center;
-        }
-        
-        .color-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 5px;
-            margin: 10px 0;
-        }
-        
-        .color-cell {
-            aspect-ratio: 1;
-            border: 1px solid #ddd;
-            cursor: pointer;
-        }
-        
-        .color-input {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        .rgb-input {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .rgb-input label {
-            margin-bottom: 5px;
-        }
-        
-        .rgb-input input {
-            padding: 5px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            width: 100%;
-        }
-        
-        .chart-controls {
-            margin: 10px 0;
-            display: flex;
-            gap: 10px;
-        }
-        
-        .tab-container {
-            margin: 20px 0;
-        }
-        
-        .tab-buttons {
-            display: flex;
-            overflow-x: auto;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .tab-btn {
-            background: none;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            background-color: #f1f1f1;
-            transition: background-color 0.3s;
-        }
-        
-        .tab-btn.active {
-            background-color: white;
-            border-bottom: 3px solid var(--primary-color);
-        }
-        
-        .tab-content {
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-top: none;
-        }
-        
-        .tab-panel {
-            display: none;
-        }
-        
-        .tab-panel.active {
-            display: block;
-        }
-        
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
-        }
-        
-        .log-container {
-            background-color: #f8f8f8;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 10px;
-            margin: 10px 0;
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-        }
-        
-        .log-entry {
-            margin-bottom: 5px;
-            padding-bottom: 5px;
-            border-bottom: 1px dashed #eee;
-        }
-        
-        .info {
-            color: #0066cc;
-        }
-        
-        .warning {
-            color: #cc9900;
-        }
-        
-        .error {
-            color: #cc0000;
-        }
-        
-        .success {
-            color: #009900;
-        }
-        
-        .progress-container {
-            width: 100%;
-            height: 20px;
-            background-color: #f1f1f1;
-            border-radius: 4px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            width: 0;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            transition: width 0.3s;
-        }
-        
-        @media (max-width: 768px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
-        }
+ :root {
+    --primary-color: #4a6fa5;
+    --primary-dark: #3a5a80;
+    --secondary-color: #47b8d6;
+    --dark-color: #333;
+    --light-color: #f4f4f4;
+    --danger-color: #dc3545;
+    --success-color: #28a745;
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --border-radius: 8px;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    line-height: 1.6;
+    color: var(--dark-color);
+    background: var(--bg-color);
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2, h3 {
+    margin-bottom: 10px;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 1.6rem;
+    margin-top: 1rem;
+}
+
+h3 {
+    font-size: 1.3rem;
+    margin-top: 0.8rem;
+}
+
+p {
+    margin-bottom: 1rem;
+    color: #444;
+}
+
+button {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    margin: 5px 0;
+    transition: var(--transition);
+    font-weight: 500;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+.next-btn {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+}
+
+.prev-btn {
+    background: #6c757d;
+}
+
+input[type="file"] {
+    margin: 10px 0;
+    border: 1px dashed #ccc;
+    padding: 8px;
+    border-radius: var(--border-radius);
+    width: 100%;
+}
+
+input[type="file"]:hover {
+    border-color: var(--primary-color);
+}
+
+input[type="number"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+input[type="range"] {
+    height: 5px;
+    border-radius: 5px;
+    background: #d7dcdf;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    background: var(--secondary-color);
+}
+
+select {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+canvas {
+    border: 1px solid #ddd;
+    margin: 10px 0;
+    max-width: 100%;
+    border-radius: 4px;
+    background-color: #fcfcfc;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+}
+
+.container {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 24px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.step {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #eee;
+}
+
+.step:last-child {
+    border-bottom: none;
+}
+
+.preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fafafa;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    margin: 15px 0;
+    border: 1px solid #eee;
+}
+
+.preview img {
+    max-width: 100%;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.controls {
+    margin: 20px 0;
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    border: 1px solid #eee;
+}
+
+.slider-container {
+    display: flex;
+    align-items: center;
+    margin: 12px 0;
+}
+
+.slider-container label {
+    width: 170px;
+    font-weight: 500;
+    color: #444;
+}
+
+input[type="range"] {
+    flex: 1;
+    margin: 0 12px;
+}
+
+.slider-value {
+    width: 50px;
+    text-align: center;
+    font-weight: 500;
+    color: var(--primary-color);
+}
+
+.color-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.color-cell {
+    aspect-ratio: 1;
+    border: 1px solid #ddd;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: transform 0.2s;
+}
+
+.color-cell:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.color-input {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 15px 0;
+}
+
+.rgb-input {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    padding: 16px;
+    border-radius: var(--border-radius);
+    border: 1px solid #eee;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.rgb-input label {
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.rgb-input input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.chart-controls {
+    margin: 10px 0;
+    display: flex;
+    gap: 10px;
+}
+
+.tab-container {
+    margin: 24px 0;
+}
+
+.tab-buttons {
+    display: flex;
+    overflow-x: auto;
+    border-bottom: 1px solid #ddd;
+    scrollbar-width: thin;
+    background-color: #f1f1f1;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    padding: 0 2px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    background-color: transparent;
+    color: #666;
+    transition: var(--transition);
+    font-weight: 500;
+    position: relative;
+    box-shadow: none;
+}
+
+.tab-btn:hover {
+    background-color: rgba(74, 111, 165, 0.1);
+    color: var(--primary-color);
+    box-shadow: none;
+}
+
+.tab-btn.active {
+    color: var(--primary-color);
+    font-weight: 600;
+    background-color: white;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tab-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background-color: var(--primary-color);
+}
+
+.tab-content {
+    padding: 24px;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+    background-color: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.tab-panel {
+    display: none;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.log-container {
+    background-color: #f8f8f8;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    padding: 12px;
+    margin: 15px 0;
+    max-height: 200px;
+    overflow-y: auto;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.log-entry {
+    margin-bottom: 6px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed #eee;
+}
+
+.info {
+    color: #0066cc;
+}
+
+.warning {
+    color: #cc9900;
+}
+
+.error {
+    color: #cc0000;
+}
+
+.success {
+    color: #009900;
+}
+
+.progress-container {
+    width: 100%;
+    height: 12px;
+    background-color: #f1f1f1;
+    border-radius: 50px;
+    margin: 15px 0;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    transition: width 0.3s ease;
+    border-radius: 50px;
+}
+
+#selected-color-preview {
+    margin: 10px auto;
+    width: 120px;
+    height: 120px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#lut-download-container {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+}
+
+#lut-download-container button {
+    min-width: 180px;
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .slider-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .slider-container label {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+    
+    input[type="range"] {
+        width: 100%;
+        margin: 8px 0;
+    }
+    
+    .tab-buttons {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .tab-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+    }
+}
     </style>
 </head>
 <body>
@@ -548,7 +751,8 @@
                 green: null,
                 blue: null
             },
-            lutImage: null
+            lutImage: null,
+            cubeData: null
         };
         
         // Initialize UI
@@ -825,106 +1029,10 @@
             fileInput.addEventListener('change', function(event) {
                 const file = event.target.files[0];
                 if (file) {
-                    loadImage(file, 'colorcard');
-                }
-            });
-            
-            // Demo image button
-            document.getElementById('use-demo-image').addEventListener('click', function() {
-                loadDemoImage('colorcard');
-            });
-        }
-        
-        // Display the color card image and extract colors
-        function displayColorCardImage(img) {
-            const canvas = document.getElementById('colorcard-preview');
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas size
-            const maxWidth = 600;
-            const scale = Math.min(1, maxWidth / img.width);
-            canvas.width = img.width * scale;
-            canvas.height = img.height * scale;
-            
-            // Draw image
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            
-            // Show image info
-            const info = document.getElementById('colorcard-info');
-            info.textContent = `Image loaded: ${img.width}×${img.height} pixels`;
-            
-            // Extract colors from the image
-            extractColorsFromImage(img);
-        }
-        
-        // Initialize test image upload
-        function initializeTestImageUpload() {
-            const fileInput = document.getElementById('test-upload');
-            fileInput.addEventListener('change', function(event) {
-                const file = event.target.files[0];
-                if (file) {
-                    loadImage(file, 'test');
-                }
-            });
-            
-            // Demo image button
-            document.getElementById('use-demo-test').addEventListener('click', function() {
-                loadDemoImage('test');
-            });
-            
-            // Apply adjustments button
-            document.getElementById('apply-adjustments').addEventListener('click', function() {
-                if (state.testImage) {
-                    processTestImage();
-                }
-            });
-        }
-        
-        // Display the test image
-        function displayTestImage(img) {
-            // Original image
-            const originalCanvas = document.getElementById('test-original');
-            const originalCtx = originalCanvas.getContext('2d');
-            
-            // Set canvas size
-            const maxWidth = 400;
-            const scale = Math.min(1, maxWidth / img.width);
-            originalCanvas.width = img.width * scale;
-            originalCanvas.height = img.height * scale;
-            
-            // Draw original image
-            originalCtx.drawImage(img, 0, 0, originalCanvas.width, originalCanvas.height);
-            
-            // Processed image (initial version is same as original)
-            const processedCanvas = document.getElementById('test-processed');
-            const processedCtx = processedCanvas.getContext('2d');
-            
-            processedCanvas.width = originalCanvas.width;
-            processedCanvas.height = originalCanvas.height;
-            processedCtx.drawImage(img, 0, 0, processedCanvas.width, processedCanvas.height);
-            
-            // Process the test image
-            processTestImage();
-        }
-        
-        // Load a demo image
-        function loadDemoImage(type) {
-            const demoUrl = type === 'colorcard' 
-                ? 'https://raw.githubusercontent.com/steveseguin/color-grading/master/logcrop.jpg'
-                : 'https://raw.githubusercontent.com/steveseguin/color-grading/master/log.jpg';
-            
-            logMessage(`Loading demo ${type} image...`, 'info');
-            
-            fetch(demoUrl)
-                .then(response => response.blob())
-                .then(blob => {
-                    const file = new File([blob], `demo-${type}.jpg`, { type: 'image/jpeg' });
                     loadImage(file, type);
                     logMessage(`Demo ${type} image loaded successfully`, 'success');
-                })
-                .catch(error => {
-                    logMessage(`Error loading demo image: ${error}`, 'error');
-                });
+                }
+			})
         }
         
         // Extract colors from the color card image
@@ -982,6 +1090,9 @@
             updateCapturedColorsGrid();
             
             logMessage('Color extraction complete', 'success');
+            
+            // Enable the next button
+            document.getElementById('colorcard-next').disabled = false;
         }
         
         // Load an image file
@@ -994,7 +1105,6 @@
                     if (type === 'colorcard') {
                         state.colorCardImage = img;
                         displayColorCardImage(img);
-                        document.getElementById('colorcard-next').disabled = false;
                     } else if (type === 'test') {
                         state.testImage = img;
                         displayTestImage(img);
@@ -1005,6 +1115,67 @@
             };
             
             reader.readAsDataURL(file);
+        }
+        
+        // Initialize the processing functionality
+        function initializeProcessing() {
+            // Process button
+            document.getElementById('process-button').addEventListener('click', function() {
+                processColorTransformation();
+            });
+            
+            // Update selected color
+            document.getElementById('update-color').addEventListener('click', function() {
+                if (state.selectedCellIndex !== null) {
+                    const r = parseInt(document.getElementById('red-input').value);
+                    const g = parseInt(document.getElementById('green-input').value);
+                    const b = parseInt(document.getElementById('blue-input').value);
+                    
+                    state.referenceColors[state.selectedCellIndex] = [
+                        isNaN(r) ? 0 : Math.min(255, Math.max(0, r)),
+                        isNaN(g) ? 0 : Math.min(255, Math.max(0, g)),
+                        isNaN(b) ? 0 : Math.min(255, Math.max(0, b))
+                    ];
+                    
+                    // Update grid
+                    const cell = document.querySelector(`.color-cell[data-index="${state.selectedCellIndex}"]`);
+                    if (cell) {
+                        cell.style.backgroundColor = rgbToHex(state.referenceColors[state.selectedCellIndex]);
+                    }
+                    
+                    // Update preview
+                    const colorPreview = document.getElementById('selected-color-preview');
+                    colorPreview.style.backgroundColor = rgbToHex(state.referenceColors[state.selectedCellIndex]);
+                }
+            });
+            
+            // Reset colors
+            document.getElementById('reset-colors').addEventListener('click', function() {
+                state.referenceColors = Array(state.rows * state.columns).fill().map(() => [128, 128, 128]);
+                initializeReferenceGrid();
+            });
+            
+            // Use example colors (color chart from the original code)
+            document.getElementById('use-example').addEventListener('click', function() {
+                const exampleColors = [
+                    [147, 163, 96], [154, 64, 73], [0, 166, 153],
+                    [61, 65, 93], [96, 102, 102], [247, 185, 48],
+                    [62, 63, 64], [245, 243, 236], [138, 83, 129]
+                ];
+                
+                // Only use as many colors as there are cells
+                state.referenceColors = [];
+                for (let i = 0; i < state.rows * state.columns; i++) {
+                    if (i < exampleColors.length) {
+                        state.referenceColors.push(exampleColors[i]);
+                    } else {
+                        state.referenceColors.push([128, 128, 128]);
+                    }
+                }
+                
+                initializeReferenceGrid();
+                logMessage('Example colors loaded', 'success');
+            });
         }
         
         // Process the color transformation
@@ -1242,189 +1413,256 @@
             logMessage('Test image processing complete', 'success');
         }
         
-        // Generate LUT
-        function generateLUT() {
-            if (!state.transformationCoefficients.red) {
-                logMessage('No color transformation available. Please process colors first.', 'error');
-                return;
-            }
+        // Initialize export functionality
+        function initializeExport() {
+            document.getElementById('generate-lut').addEventListener('click', function() {
+                generateLUT();
+            });
             
-            logMessage('Generating LUT...', 'info');
-            updateProgress('export', 0);
-            
-            // Create canvas for the LUT
-            const lutCanvas = document.getElementById('lut-preview');
-            const lutCtx = lutCanvas.getContext('2d');
-            
-            if (state.lutFormat === 'png') {
-                // For PNG LUT (OBS compatible)
-                lutCanvas.width = 64;
-                lutCanvas.height = 64;
-                
-                // Clear canvas
-                lutCtx.clearRect(0, 0, lutCanvas.width, lutCanvas.height);
-                
-                // Generate neutral LUT data
-                const lutData = lutCtx.createImageData(64, 64);
-                const data = lutData.data;
-                
-                let i = 0;
-                for (let b = 0; b < 8; b++) {
-                    for (let g = 0; g < 8; g++) {
-                        for (let r = 0; r < 8; r++) {
-                            const index = (b * 8 + g) * 32 + r * 4;
-                            data[index] = r * 255 / 7;     // R
-                            data[index + 1] = g * 255 / 7; // G
-                            data[index + 2] = b * 255 / 7; // B
-                            data[index + 3] = 255;         // A
-                            
-                            updateProgress('export', i++ / (8 * 8 * 8) * 50);
-                        }
-                    }
-                }
-                
-                // Apply transformation to LUT
-                for (let i = 0; i < data.length; i += 4) {
-                    // Get original values
-                    const r = data[i];
-                    const g = data[i + 1];
-                    const b = data[i + 2];
-                    
-                    // Apply color transformation
-                    let newR = applyPolynomial(r, state.transformationCoefficients.red);
-                    let newG = applyPolynomial(g, state.transformationCoefficients.green);
-                    let newB = applyPolynomial(b, state.transformationCoefficients.blue);
-                    
-                    // Apply brightness adjustment
-                    newR += state.brightnessAdjustment;
-                    newG += state.brightnessAdjustment;
-                    newB += state.brightnessAdjustment;
-                    
-                    // Apply gamma (using lookup table)
-                    const gammaValue = state.gammaValue;
-                    if (gammaValue !== 1.0) {
-                        // Create simple gamma lookup
-                        newR = Math.pow(newR / 255, 1 / gammaValue) * 255;
-                        newG = Math.pow(newG / 255, 1 / gammaValue) * 255;
-                        newB = Math.pow(newB / 255, 1 / gammaValue) * 255;
-                    }
-                    
-                    // Clamp values
-                    data[i] = Math.min(255, Math.max(0, Math.round(newR)));
-                    data[i + 1] = Math.min(255, Math.max(0, Math.round(newG)));
-                    data[i + 2] = Math.min(255, Math.max(0, Math.round(newB)));
-                    
-                    updateProgress('export', 50 + (i / data.length) * 40);
-                }
-                
-                // Put the data back to the canvas
-                lutCtx.putImageData(lutData, 0, 0);
-                
-            } else if (state.lutFormat === 'cube') {
-                // For CUBE LUT
-                const lutSize = state.lutSize;
-                const cubeData = [];
-                
-                // Generate header
-                let cubeText = `# LUT generated by Browser-based LUT Maker\n`;
-                cubeText += `# Created: ${new Date().toISOString()}\n`;
-                cubeText += `LUT_3D_SIZE ${lutSize}\n\n`;
-                
-                // Generate data points
-                let count = 0;
-                const totalCount = lutSize * lutSize * lutSize;
-                
-                for (let b = 0; b < lutSize; b++) {
-                    for (let g = 0; g < lutSize; g++) {
-                        for (let r = 0; r < lutSize; r++) {
-                            // Original normalized values
-                            const origR = r / (lutSize - 1);
-                            const origG = g / (lutSize - 1);
-                            const origB = b / (lutSize - 1);
-                            
-                            // Apply transformation
-                            let newR = applyPolynomial(origR * 255, state.transformationCoefficients.red) / 255;
-                            let newG = applyPolynomial(origG * 255, state.transformationCoefficients.green) / 255;
-                            let newB = applyPolynomial(origB * 255, state.transformationCoefficients.blue) / 255;
-                            
-                            // Apply brightness adjustment
-                            newR += state.brightnessAdjustment / 255;
-                            newG += state.brightnessAdjustment / 255;
-                            newB += state.brightnessAdjustment / 255;
-                            
-                            // Apply gamma
-                            const gammaValue = state.gammaValue;
-                            if (gammaValue !== 1.0) {
-                                newR = Math.pow(newR, 1 / gammaValue);
-                                newG = Math.pow(newG, 1 / gammaValue);
-                                newB = Math.pow(newB, 1 / gammaValue);
-                            }
-                            
-                            // Clamp values between 0 and 1
-                            newR = Math.min(1, Math.max(0, newR));
-                            newG = Math.min(1, Math.max(0, newG));
-                            newB = Math.min(1, Math.max(0, newB));
-                            
-                            // Add to CUBE data
-                            cubeText += `${newR.toFixed(6)} ${newG.toFixed(6)} ${newB.toFixed(6)}\n`;
-                            
-                            count++;
-                            updateProgress('export', (count / totalCount) * 90);
-                        }
-                    }
-                }
-                
-                // Store the CUBE data
-                state.cubeData = cubeText;
-                
-                // Create a preview of the LUT
-                lutCanvas.width = 256;
-                lutCanvas.height = 16;
-                lutCtx.clearRect(0, 0, lutCanvas.width, lutCanvas.height);
-                
-                // Draw a gradient to visualize the LUT
-                const gradient = lutCtx.createLinearGradient(0, 0, lutCanvas.width, 0);
-                for (let i = 0; i <= 1; i += 0.1) {
-                    // Original color
-                    const r = i * 255;
-                    const g = i * 255;
-                    const b = i * 255;
-                    
-                    // Transformed color
-                    let newR = applyPolynomial(r, state.transformationCoefficients.red);
-                    let newG = applyPolynomial(g, state.transformationCoefficients.green);
-                    let newB = applyPolynomial(b, state.transformationCoefficients.blue);
-                    
-                    // Apply brightness and gamma
-                    newR += state.brightnessAdjustment;
-                    newG += state.brightnessAdjustment;
-                    newB += state.brightnessAdjustment;
-                    
-                    if (state.gammaValue !== 1.0) {
-                        newR = Math.pow(newR / 255, 1 / state.gammaValue) * 255;
-                        newG = Math.pow(newG / 255, 1 / state.gammaValue) * 255;
-                        newB = Math.pow(newB / 255, 1 / state.gammaValue) * 255;
-                    }
-                    
-                    // Clamp values
-                    newR = Math.min(255, Math.max(0, Math.round(newR)));
-                    newG = Math.min(255, Math.max(0, Math.round(newG)));
-                    newB = Math.min(255, Math.max(0, Math.round(newB)));
-                    
-                    const color = `rgb(${newR}, ${newG}, ${newB})`;
-                    gradient.addColorStop(i, color);
-                }
-                
-                lutCtx.fillStyle = gradient;
-                lutCtx.fillRect(0, 0, lutCanvas.width, lutCanvas.height);
-            }
-            
-            updateProgress('export', 100);
-            logMessage('LUT generation complete!', 'success');
-            
-            // Show download button
-            document.getElementById('lut-download-container').style.display = 'block';
+            document.getElementById('download-lut').addEventListener('click', function() {
+                downloadLUT();
+            });
         }
+		
+		// Generate LUT
+		function generateLUT() {
+			if (!state.transformationCoefficients.red) {
+				logMessage('No color transformation available. Please process colors first.', 'error');
+				return;
+			}
+			
+			logMessage('Generating LUT...', 'info');
+			updateProgress('export', 0);
+			
+			// Create canvas for the LUT
+			const lutCanvas = document.getElementById('lut-preview');
+			const lutCtx = lutCanvas.getContext('2d');
+			
+			if (state.lutFormat === 'png') {
+				// For PNG LUT (OBS compatible)
+				lutCanvas.width = 64;
+				lutCanvas.height = 64;
+				
+				// Clear canvas
+				lutCtx.clearRect(0, 0, lutCanvas.width, lutCanvas.height);
+				
+				// Generate neutral LUT data
+				const lutData = lutCtx.createImageData(64, 64);
+				const data = lutData.data;
+				
+				// Fill the entire 64x64 grid
+				let progress = 0;
+				for (let y = 0; y < 64; y++) {
+					for (let x = 0; x < 64; x++) {
+						// Calculate RGB values from position
+						// In 64x64 format, each component (r,g,b) gets 8 values (0-7)
+						// Format is essentially RRRRRRRR GGGGGGGG BBBBBBBB ... etc.
+						const r = Math.floor(x % 8) * 255 / 7;     // R cycles every 8 pixels
+						const g = Math.floor(x / 8) * 255 / 7;     // G cycles every 8 columns of R
+						const b = Math.floor(y / 8) * 255 / 7;     // B changes every 8 rows
+						
+						// Calculate pixel index
+						const index = (y * 64 + x) * 4;
+						
+						// Set RGBA values
+						data[index] = r;
+						data[index + 1] = g;
+						data[index + 2] = b;
+						data[index + 3] = 255;  // Alpha
+						
+						// Update progress (less frequently to improve performance)
+						if (++progress % 256 === 0) {
+							updateProgress('export', (progress / (64 * 64)) * 30);
+						}
+					}
+				}
+				
+				// Apply transformation to LUT
+				for (let i = 0; i < data.length; i += 4) {
+					// Get original values
+					const r = data[i];
+					const g = data[i + 1];
+					const b = data[i + 2];
+					
+					// Apply color transformation (with safeguards against NaN)
+					let newR = safeApplyPolynomial(r, state.transformationCoefficients.red);
+					let newG = safeApplyPolynomial(g, state.transformationCoefficients.green);
+					let newB = safeApplyPolynomial(b, state.transformationCoefficients.blue);
+					
+					// Apply brightness adjustment
+					newR += state.brightnessAdjustment;
+					newG += state.brightnessAdjustment;
+					newB += state.brightnessAdjustment;
+					
+					// Apply gamma (using lookup table)
+					const gammaValue = state.gammaValue || 1.0;
+					if (gammaValue !== 1.0) {
+						// Create simple gamma lookup with checks to prevent NaN
+						newR = safeGamma(newR, gammaValue);
+						newG = safeGamma(newG, gammaValue);
+						newB = safeGamma(newB, gammaValue);
+					}
+					
+					// Clamp values
+					data[i] = Math.min(255, Math.max(0, Math.round(newR)));
+					data[i + 1] = Math.min(255, Math.max(0, Math.round(newG)));
+					data[i + 2] = Math.min(255, Math.max(0, Math.round(newB)));
+					
+					// Update progress (less frequently to improve performance)
+					if (i % 1024 === 0) {
+						updateProgress('export', 30 + (i / data.length) * 60);
+					}
+				}
+				
+				// Put the data back to the canvas
+				lutCtx.putImageData(lutData, 0, 0);
+				
+			} else if (state.lutFormat === 'cube') {
+				// For CUBE LUT
+				const lutSize = state.lutSize;
+				
+				// Generate header
+				let cubeText = `# LUT generated by Browser-based LUT Maker\n`;
+				cubeText += `# Created: ${new Date().toISOString()}\n`;
+				cubeText += `LUT_3D_SIZE ${lutSize}\n\n`;
+				
+				// Generate data points
+				let count = 0;
+				const totalCount = lutSize * lutSize * lutSize;
+				
+				for (let b = 0; b < lutSize; b++) {
+					for (let g = 0; g < lutSize; g++) {
+						for (let r = 0; r < lutSize; r++) {
+							// Original normalized values
+							const origR = r / (lutSize - 1);
+							const origG = g / (lutSize - 1);
+							const origB = b / (lutSize - 1);
+							
+							// Apply transformation
+							let newR = safeApplyPolynomial(origR * 255, state.transformationCoefficients.red) / 255;
+							let newG = safeApplyPolynomial(origG * 255, state.transformationCoefficients.green) / 255;
+							let newB = safeApplyPolynomial(origB * 255, state.transformationCoefficients.blue) / 255;
+							
+							// Apply brightness adjustment
+							newR += state.brightnessAdjustment / 255;
+							newG += state.brightnessAdjustment / 255;
+							newB += state.brightnessAdjustment / 255;
+							
+							// Apply gamma
+							const gammaValue = state.gammaValue || 1.0;
+							if (gammaValue !== 1.0) {
+								newR = safeGammaValue(newR, gammaValue);
+								newG = safeGammaValue(newG, gammaValue);
+								newB = safeGammaValue(newB, gammaValue);
+							}
+							
+							// Clamp values between 0 and 1
+							newR = Math.min(1, Math.max(0, newR));
+							newG = Math.min(1, Math.max(0, newG));
+							newB = Math.min(1, Math.max(0, newB));
+							
+							// Add to CUBE data
+							cubeText += `${newR.toFixed(6)} ${newG.toFixed(6)} ${newB.toFixed(6)}\n`;
+							
+							count++;
+							if (count % 128 === 0) {
+								updateProgress('export', (count / totalCount) * 90);
+							}
+						}
+					}
+				}
+				
+				// Store the CUBE data
+				state.cubeData = cubeText;
+				
+				// Create a preview of the LUT
+				lutCanvas.width = 256;
+				lutCanvas.height = 16;
+				lutCtx.clearRect(0, 0, lutCanvas.width, lutCanvas.height);
+				
+				// Draw a gradient to visualize the LUT
+				const gradient = lutCtx.createLinearGradient(0, 0, lutCanvas.width, 0);
+				for (let i = 0; i <= 1; i += 0.1) {
+					// Original color
+					const r = i * 255;
+					const g = i * 255;
+					const b = i * 255;
+					
+					// Transformed color
+					let newR = safeApplyPolynomial(r, state.transformationCoefficients.red);
+					let newG = safeApplyPolynomial(g, state.transformationCoefficients.green);
+					let newB = safeApplyPolynomial(b, state.transformationCoefficients.blue);
+					
+					// Apply brightness and gamma
+					newR += state.brightnessAdjustment;
+					newG += state.brightnessAdjustment;
+					newB += state.brightnessAdjustment;
+					
+					if (state.gammaValue !== 1.0) {
+						newR = safeGamma(newR, state.gammaValue);
+						newG = safeGamma(newG, state.gammaValue);
+						newB = safeGamma(newB, state.gammaValue);
+					}
+					
+					// Clamp values
+					newR = Math.min(255, Math.max(0, Math.round(newR)));
+					newG = Math.min(255, Math.max(0, Math.round(newG)));
+					newB = Math.min(255, Math.max(0, Math.round(newB)));
+					
+					const color = `rgb(${newR}, ${newG}, ${newB})`;
+					gradient.addColorStop(i, color);
+				}
+				
+				lutCtx.fillStyle = gradient;
+				lutCtx.fillRect(0, 0, lutCanvas.width, lutCanvas.height);
+			}
+			
+			updateProgress('export', 100);
+			logMessage('LUT generation complete!', 'success');
+			
+			// Show download button
+			document.getElementById('lut-download-container').style.display = 'block';
+		}
+
+		// Safe version of applyPolynomial that prevents NaN values
+		function safeApplyPolynomial(value, coefficients) {
+			if (!coefficients || !Array.isArray(coefficients)) {
+				return value; // Return original value if coefficients are invalid
+			}
+			
+			let result = 0;
+			for (let i = 0; i < coefficients.length; i++) {
+				const coef = coefficients[i] || 0; // Default to 0 if coefficient is undefined
+				const term = coef * Math.pow(value, i);
+				
+				// Check if term is valid number
+				result += Number.isFinite(term) ? term : 0;
+			}
+			
+			return Number.isFinite(result) ? result : value;
+		}
+
+		// Safe version of gamma calculation to prevent NaN
+		function safeGamma(value, gamma) {
+			if (!Number.isFinite(value) || value < 0) return 0;
+			if (value === 0) return 0;
+			
+			const normalizedValue = Math.max(0, Math.min(1, value / 255));
+			const result = Math.pow(normalizedValue, 1 / (gamma || 1.0)) * 255;
+			
+			return Number.isFinite(result) ? result : value;
+		}
+
+		// Safe version of gamma calculation for normalized values (0-1)
+		function safeGammaValue(value, gamma) {
+			if (!Number.isFinite(value) || value < 0) return 0;
+			if (value === 0) return 0;
+			
+			const normalizedValue = Math.max(0, Math.min(1, value));
+			const result = Math.pow(normalizedValue, 1 / (gamma || 1.0));
+			
+			return Number.isFinite(result) ? result : value;
+		}
         
         // Download the generated LUT
         function downloadLUT() {
@@ -1445,6 +1683,109 @@
                 URL.revokeObjectURL(url);
             }
         }
-</script>
+        
+        // Initialize additional event listeners
+        function initializeEventListeners() {
+            // Nothing additional to initialize currently
+            // This function can be expanded as needed
+        }
+		
+		        // Display the test image
+        function displayTestImage(img) {
+            // Original image
+            const originalCanvas = document.getElementById('test-original');
+            const originalCtx = originalCanvas.getContext('2d');
+            
+            // Set canvas size
+            const maxWidth = 400;
+            const scale = Math.min(1, maxWidth / img.width);
+            originalCanvas.width = img.width * scale;
+            originalCanvas.height = img.height * scale;
+            
+            // Draw original image
+            originalCtx.drawImage(img, 0, 0, originalCanvas.width, originalCanvas.height);
+            
+            // Processed image (initial version is same as original)
+            const processedCanvas = document.getElementById('test-processed');
+            const processedCtx = processedCanvas.getContext('2d');
+            
+            processedCanvas.width = originalCanvas.width;
+            processedCanvas.height = originalCanvas.height;
+            processedCtx.drawImage(img, 0, 0, processedCanvas.width, processedCanvas.height);
+            
+            // Process the test image
+            processTestImage();
+        }
+        
+		// Demo image button
+		document.getElementById('use-demo-image').addEventListener('click', function() {
+			loadDemoImage('colorcard');
+		});
+			
+        // Load a demo image
+        function loadDemoImage(type) {
+            const demoUrl = type === 'colorcard' 
+                ? 'logcrop.jpg'
+                : 'log.jpg';
+            
+            logMessage(`Loading demo ${type} image...`, 'info');
+            
+            fetch(demoUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], `demo-${type}.jpg`, { type: 'image/jpeg' });
+                    loadImage(file, 'colorcard');
+                });
+        }
+        
+        // Display the color card image and extract colors
+        function displayColorCardImage(img) {
+            const canvas = document.getElementById('colorcard-preview');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size
+            const maxWidth = 600;
+            const scale = Math.min(1, maxWidth / img.width);
+            canvas.width = img.width * scale;
+            canvas.height = img.height * scale;
+            
+            // Draw image
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            
+            // Show image info
+            const info = document.getElementById('colorcard-info');
+            info.textContent = `Image loaded: ${img.width}×${img.height} pixels`;
+            
+            // Extract colors from the image
+            extractColorsFromImage(img);
+        }
+		
+		// Demo image button
+		document.getElementById('use-demo-test').addEventListener('click', function() {
+			loadDemoImage('test');
+		});
+		
+		// Apply adjustments button
+		document.getElementById('apply-adjustments').addEventListener('click', function() {
+			if (state.testImage) {
+				processTestImage();
+			}
+		});
+			
+		 // Initialize test image upload
+        function initializeTestImageUpload() {
+            const fileInput = document.getElementById('test-upload');
+            fileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    loadImage(file, 'test');
+                }
+            });
+            
+
+        }
+        
+    </script>
 </body>
 </html>
+	

@@ -62,6 +62,9 @@ p {
     color: #444;
 }
 
+u {
+	margin-left: 30px;
+}
 button {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
@@ -479,6 +482,12 @@ input[type="range"] {
     <div class="container">
         <h1>Browser-based LUT Maker</h1>
         <p>Create your own custom LUTs for OBS or other applications using color cards.</p>
+		<div class="info-section" style="margin-top: 10px; font-size: 0.9rem; color: #666; border-top: 1px solid #eee; padding-top: 10px;">
+			<p>Created by Steve Seguin. 
+			   <a href="https://github.com/steveseguin/LUT-maker" target="_blank">View on GitHub</a> | 
+			   <a href="https://www.youtube.com/watch?v=pu9IpbfckDo" target="_blank">Watch Tutorial Video</a>
+			</p>
+		</div>
     </div>
     
     <div class="tab-container">
@@ -529,6 +538,26 @@ input[type="range"] {
                         </div>
                     </div>
                     <p>This configuration defines how your color chart is laid out and how much border to ignore when analyzing each color block.</p>
+					<div class="step">
+					<h3>Templates</h3>
+					<div class="controls">
+						<h4>Color Presets</h4>
+						<div style="display: flex; gap: 10px; margin: 10px 0;">
+							<select id="color-preset-select" style="flex-grow: 1;">
+								<option value="">-- Select a Preset --</option>
+								<option value="datacolor24">Datacolor SpyderCHECKR 24</option>
+								<option value="datacolor48">Datacolor SpyderCHECKR 48 (Full)</option>
+							</select>
+							<button id="apply-preset-button">Apply Preset</button>
+						</div>
+						<h4>Save/Load Template</h4>
+						<div style="display: flex; gap: 10px; margin: 10px 0;">
+							<button id="save-template-button">Save Template</button>
+							<button id="load-template-button">Load Saved Template</button>
+						</div>
+						<p style="margin-top: 8px; font-size: 0.9em; color: #666;">Templates are saved to your browser's local storage.</p>
+					</div>
+				</div>
                     <button id="setup-next" class="next-btn">Continue to Reference Colors</button>
                 </div>
             </div>
@@ -755,20 +784,32 @@ input[type="range"] {
             cubeData: null
         };
         
-        // Initialize UI
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeSliders();
-            initializeTabs();
-            initializeReferenceGrid();
-            initializeColorCardUpload();
-            initializeTestImageUpload();
-            initializeProcessing();
-            initializeExport();
-            initializeEventListeners();
-            
-            // Log welcome message
-            logMessage('Welcome to the Browser-based LUT Maker!', 'info');
-        });
+		document.addEventListener('DOMContentLoaded', function() {
+		  // Call the original initialization
+		  initializeSliders();
+		  initializeTabs();
+		  initializeReferenceGrid();
+		  initializeColorCardUpload();
+		  initializeTestImageUpload();
+		  initializeProcessing();
+		  initializeExport();
+		  initializeEventListeners();
+		  initializeTemplateControls();
+		  
+		  // Try to load saved template on startup
+		  setTimeout(() => {
+			try {
+			  if (localStorage.getItem('lutMakerTemplate')) {
+				loadTemplate();
+			  }
+			} catch (e) {
+			  // Silently fail if local storage is not available
+			}
+		  }, 500);
+		  
+		  // Log welcome message
+		  logMessage('Welcome to the Browser-based LUT Maker!', 'info');
+		});
         
         // Initialize sliders and inputs
         function initializeSliders() {
@@ -1177,6 +1218,132 @@ input[type="range"] {
                 logMessage('Example colors loaded', 'success');
             });
         }
+		
+		const colorPresets = {
+		  datacolor24: {
+			name: "Datacolor SpyderCHECKR 24",
+			rows: 4,
+			columns: 6,
+			colors: [
+			  [98, 187, 166], [126, 125, 174], [82, 106, 60], [87, 120, 155], [197, 145, 125], [112, 76, 60],
+			  [222, 118, 32], [58, 89, 160], [195, 79, 95], [83, 58, 106], [157, 188, 54], [238, 158, 25],
+			  [0, 127, 159], [192, 75, 145], [245, 205, 0], [186, 26, 51], [57, 146, 64], [25, 55, 135],
+			  [249, 242, 238], [202, 198, 195], [161, 157, 154], [122, 118, 116], [80, 80, 78], [43, 41, 43]
+			]
+		  },
+		  datacolor48: {
+			name: "Datacolor SpyderCHECKR 48",
+			rows: 6,
+			columns: 8,
+			colors: [
+			  [115, 82, 68], [194, 150, 130], [98, 122, 157], [87, 108, 67], [133, 128, 177], [103, 189, 170],
+			  [214, 126, 44], [80, 91, 166], [193, 90, 99], [94, 60, 108], [157, 188, 64], [224, 163, 46],
+			  [56, 61, 150], [70, 148, 73], [175, 54, 60], [231, 199, 31], [187, 86, 149], [8, 133, 161],
+			  [243, 243, 242], [200, 200, 200], [160, 160, 160], [122, 122, 121], [85, 85, 85], [52, 52, 52],
+			  [51, 43, 41], [95, 84, 79], [132, 121, 115], [166, 156, 148], [199, 189, 182], [241, 233, 228],
+			  [108, 60, 45], [159, 92, 64], [210, 129, 83], [222, 165, 117], [235, 198, 146], [249, 234, 189],
+			  [45, 61, 36], [52, 95, 45], [65, 131, 57], [129, 167, 83], [177, 201, 111], [231, 231, 152],
+			  [51, 63, 116], [47, 100, 158], [65, 137, 194], [117, 175, 211], [157, 201, 231], [199, 228, 243],
+			  [69, 38, 102], [106, 61, 152], [142, 85, 193], [176, 126, 219], [205, 164, 231], [230, 196, 243],
+			  [84, 48, 37], [136, 68, 47], [186, 95, 58], [209, 150, 58], [239, 192, 58], [242, 232, 72]
+			]
+		  },
+		  // Can add other presets here
+		};
+		
+		// Add template saving/loading functionality
+		function saveTemplate() {
+		  const template = {
+			rows: state.rows,
+			columns: state.columns,
+			cellBorderPercentage: state.cellBorderPercentage,
+			referenceColors: state.referenceColors
+		  };
+		  
+		  try {
+			localStorage.setItem('lutMakerTemplate', JSON.stringify(template));
+			logMessage('Template saved to browser storage', 'success');
+		  } catch (error) {
+			logMessage('Failed to save template: ' + error.message, 'error');
+		  }
+		}
+
+		function loadTemplate() {
+		  try {
+			const savedTemplate = localStorage.getItem('lutMakerTemplate');
+			if (savedTemplate) {
+			  const template = JSON.parse(savedTemplate);
+			  
+			  // Update state
+			  state.rows = template.rows;
+			  state.columns = template.columns;
+			  state.cellBorderPercentage = template.cellBorderPercentage;
+			  state.referenceColors = template.referenceColors;
+			  
+			  // Update UI
+			  document.getElementById('rows-slider').value = state.rows;
+			  document.getElementById('rows-value').textContent = state.rows;
+			  
+			  document.getElementById('columns-slider').value = state.columns;
+			  document.getElementById('columns-value').textContent = state.columns;
+			  
+			  document.getElementById('border-slider').value = state.cellBorderPercentage;
+			  document.getElementById('border-value').textContent = state.cellBorderPercentage + '%';
+			  
+			  // Refresh the grid
+			  initializeReferenceGrid();
+			  
+			  logMessage('Template loaded from browser storage', 'success');
+			} else {
+			  logMessage('No saved template found', 'warning');
+			}
+		  } catch (error) {
+			logMessage('Failed to load template: ' + error.message, 'error');
+		  }
+		}
+
+		// Apply preset colors
+		function applyPreset(presetName) {
+		  const preset = colorPresets[presetName];
+		  if (!preset) {
+			logMessage(`Preset "${presetName}" not found`, 'error');
+			return;
+		  }
+		  
+		  // Update grid dimensions
+		  state.rows = preset.rows;
+		  state.columns = preset.columns;
+		  document.getElementById('rows-slider').value = state.rows;
+		  document.getElementById('rows-value').textContent = state.rows;
+		  document.getElementById('columns-slider').value = state.columns;
+		  document.getElementById('columns-value').textContent = state.columns;
+		  
+		  // Update reference colors
+		  state.referenceColors = [...preset.colors];
+		  
+		  // Refresh the grid
+		  initializeReferenceGrid();
+		  
+		  logMessage(`Applied "${preset.name}" color preset`, 'success');
+		}
+
+		// Initialize presets dropdown and template UI
+		function initializeTemplateControls() {
+		  // Add event listeners for template buttons
+		  document.getElementById('apply-preset-button').addEventListener('click', function() {
+			const select = document.getElementById('color-preset-select');
+			const selectedPreset = select.value;
+			if (selectedPreset) {
+			  applyPreset(selectedPreset);
+			} else {
+			  logMessage('Please select a preset first', 'warning');
+			}
+		  });
+		  
+		  document.getElementById('save-template-button').addEventListener('click', saveTemplate);
+		  document.getElementById('load-template-button').addEventListener('click', loadTemplate);
+		}
+		
         
         // Process the color transformation
         function processColorTransformation() {

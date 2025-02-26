@@ -1973,15 +1973,13 @@ input[type="range"] {
 		// Safe version of applyPolynomial that prevents NaN values
 		function safeApplyPolynomial(value, coefficients) {
 			if (!coefficients || !Array.isArray(coefficients)) {
-				return value; // Return original value if coefficients are invalid
+				return value;
 			}
 			
 			let result = 0;
 			for (let i = 0; i < coefficients.length; i++) {
-				const coef = coefficients[i] || 0; // Default to 0 if coefficient is undefined
+				const coef = coefficients[i] || 0;
 				const term = coef * Math.pow(value, i);
-				
-				// Check if term is valid number
 				result += Number.isFinite(term) ? term : 0;
 			}
 			
@@ -2225,6 +2223,18 @@ input[type="range"] {
 				}
 			}
 			
+			// Normalize input values for numerical stability
+			const rMin = Math.min(...r), rMax = Math.max(...r);
+			const gMin = Math.min(...g), gMax = Math.max(...g);
+			const bMin = Math.min(...b), bMax = Math.max(...b);
+			
+			const rRange = rMax - rMin, gRange = gMax - gMin, bRange = bMax - bMin;
+			
+			// Avoid division by zero
+			const normalizedR = rRange === 0 ? r.map(() => 0) : r.map(val => (val - rMin) / rRange);
+			const normalizedG = gRange === 0 ? g.map(() => 0) : g.map(val => (val - gMin) / gRange);
+			const normalizedB = bRange === 0 ? b.map(() => 0) : b.map(val => (val - bMin) / bRange);
+			
 			// Create design matrix
 			const matrix = [];
 			const n = r.length;
@@ -2233,7 +2243,11 @@ input[type="range"] {
 				const row = [];
 				for (const [di, dj, dk] of degrees) {
 					// Calculate r^i * g^j * b^k
-					row.push(Math.pow(r[i], di) * Math.pow(g[i], dj) * Math.pow(b[i], dk));
+					row.push(
+						Math.pow(normalizedR[i], di) * 
+						Math.pow(normalizedG[i], dj) * 
+						Math.pow(normalizedB[i], dk)
+					);
 				}
 				matrix.push(row);
 			}
@@ -2307,45 +2321,50 @@ input[type="range"] {
 				coefficients[i] = (augmentedMatrix[i][m] - sum) / augmentedMatrix[i][i];
 			}
 			
-			return { coefficients, degrees };
-		}
+			return { coefficients, degrees, normalize: { rMin, rMax, gMin, gMax, bMin, bMax } };
+}
 
 		function applyPoly3d(r, g, b, model) {
 			if (!model || !model.coefficients || !model.degrees) {
-				console.error('Invalid model provided to applyPoly3d');
 				return r; // Return input value as fallback
 			}
 			
-			let result = 0;
-			const { coefficients, degrees } = model;
+			const { coefficients, degrees, normalize } = model;
 			
-			try {
-				for (let i = 0; i < coefficients.length; i++) {
-					if (i >= degrees.length) {
-						console.warn('Coefficients and degrees length mismatch');
-						break;
-					}
-					
-					const [di, dj, dk] = degrees[i];
-					const coef = coefficients[i] || 0; // Handle undefined coefficients
-					
-					// Protect against large powers which can cause overflow
-					const term = coef * 
-								Math.pow(Math.min(255, Math.max(0, r)), di) * 
-								Math.pow(Math.min(255, Math.max(0, g)), dj) * 
-								Math.pow(Math.min(255, Math.max(0, b)), dk);
-					
-					// Check if term is valid number
-					if (isFinite(term)) {
-						result += term;
-					}
-				}
+			// Normalize input values using the same parameters as during training
+			let normalizedR = r, normalizedG = g, normalizedB = b;
+			
+			if (normalize) {
+				const { rMin, rMax, gMin, gMax, bMin, bMax } = normalize;
+				const rRange = rMax - rMin, gRange = gMax - gMin, bRange = bMax - bMin;
 				
-				return isFinite(result) ? result : r; // Fallback to input value if result is invalid
-			} catch (error) {
-				console.error('Error in applyPoly3d:', error);
-				return r; // Fallback to input value on error
+				// Avoid division by zero
+				normalizedR = rRange === 0 ? 0 : (r - rMin) / rRange;
+				normalizedG = gRange === 0 ? 0 : (g - gMin) / gRange;
+				normalizedB = bRange === 0 ? 0 : (b - bMin) / bRange;
 			}
+			
+			let result = 0;
+			
+			for (let i = 0; i < coefficients.length; i++) {
+				if (i >= degrees.length) break;
+				
+				const [di, dj, dk] = degrees[i];
+				const coef = coefficients[i] || 0;
+				
+				// Use a safer approach to calculate powers
+				let term = coef;
+				
+				if (normalizedR !== 0 || di === 0) term *= Math.pow(normalizedR, di);
+				if (normalizedG !== 0 || dj === 0) term *= Math.pow(normalizedG, dj);
+				if (normalizedB !== 0 || dk === 0) term *= Math.pow(normalizedB, dk);
+				
+				if (isFinite(term)) {
+					result += term;
+				}
+			}
+			
+			return isFinite(result) ? result : r;
 		}
 
 		function generateGammaCurves() {
@@ -2454,9 +2473,10 @@ input[type="range"] {
 						// Create more data points using the basic coefficients
 						const gridSize = 3;
 						const grid = [];
-						for (let r = 0; r < 256; r += 256 / gridSize) {
-							for (let g = 0; g < 256; g += 256 / gridSize) {
-								for (let b = 0; b < 256; b += 256 / gridSize) {
+						const gridValues = [0, 255]; // This matches np.linspace(0,255,2)
+						for (let r of gridValues) {
+							for (let g of gridValues) {
+								for (let b of gridValues) {
 									grid.push([r, g, b]);
 								}
 							}
@@ -2641,38 +2661,52 @@ input[type="range"] {
 			return lutCanvas;
 		}
 		
-		// Create gamma curves for roll-off like in the Python code
-		function generateGammaCurves() {
-			// Create highlight roll-off curve (LUT2 in Python)
-			const highlightCurve = new Array(256);
-			for (let i = 0; i < 256; i++) {
-				if (i > 225) {
-					// Similar to your Python code: for y in range(22500,25500)
-					const y = i * 100;
-					const x = Math.round((y/100-225) + 1/(1.2**(225-y/100)) + 225);
-					highlightCurve[i] = x;
-				} else {
-					highlightCurve[i] = i;
-				}
+		function applyAdvancedGamma(r, g, b, curves) {
+			const { highlightCurve, shadowCurve } = curves;
+			
+			let newR = r, newG = g, newB = b;
+			
+			// Apply highlight roll-off (when RGB > 225 and < 492)
+			if (newR > 225 && newR < 492) {
+				newR = highlightCurve[Math.round(newR) - 226];
+			} else if (newR >= 492) {
+				newR = 255;
 			}
 			
-			// Create shadow roll-off curve (LUT1 in Python, which is 255-flip(LUT2))
-			const shadowCurve = new Array(256);
-			for (let i = 0; i < 256; i++) {
-				if (i < 30) {
-					// Inverse of the highlight curve logic
-					const y = (255 - i) * 100;
-					const x = Math.round((y/100-225) + 1/(1.2**(225-y/100)) + 225);
-					shadowCurve[i] = 255 - x;
-				} else {
-					shadowCurve[i] = i;
-				}
+			if (newG > 225 && newG < 492) {
+				newG = highlightCurve[Math.round(newG) - 226];
+			} else if (newG >= 492) {
+				newG = 255;
 			}
 			
-			return { highlightCurve, shadowCurve };
+			if (newB > 225 && newB < 492) {
+				newB = highlightCurve[Math.round(newB) - 226];
+			} else if (newB >= 492) {
+				newB = 255;
+			}
+			
+			// Apply shadow roll-off (when RGB <= 30 and RGB > -461)
+			if (newR <= 30 && newR > -461) {
+				newR = shadowCurve[Math.round(newR + 461)];
+			} else if (newR <= -461) {
+				newR = 0;
+			}
+			
+			if (newG <= 30 && newG > -461) {
+				newG = shadowCurve[Math.round(newG + 461)];
+			} else if (newG <= -461) {
+				newG = 0;
+			}
+			
+			if (newB <= 30 && newB > -461) {
+				newB = shadowCurve[Math.round(newB + 461)];
+			} else if (newB <= -461) {
+				newB = 0;
+			}
+			
+			return [newR, newG, newB];
 		}
 
     </script>
 </body>
 </html>
-	
